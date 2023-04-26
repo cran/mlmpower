@@ -1,0 +1,1920 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Brian T. Keller" />
+
+
+<title>Using mlmpower Package to Conduct Multilevel Power Analysis</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Using <code>mlmpower</code> Package to
+Conduct Multilevel Power Analysis</h1>
+<h4 class="author">Brian T. Keller</h4>
+
+
+
+<div id="illustration-1-cross-sectional-power-analysis" class="section level2">
+<h2>Illustration 1: Cross-Sectional Power Analysis</h2>
+<p>The first illustration demonstrates a power analysis for a
+cross-sectional application of the following multilevel model. To
+provide a substantive context, consider a prototypical education example
+where students are nested in schools. Intraclass correlations for
+achievement-related outcomes often range between .10 and .25 (Hedges
+&amp; Hedberg, 2007; Hedges &amp; Hedberg, 2013; Sellstrom &amp;
+Bremberg, 2006; Spybrook et al., 2011; Stockford, 2009). To accommodate
+uncertainty about this important parameter, the power simulations
+investigate intraclass correlation values of .10 and .25.</p>
+<p>The multilevel model for the illustration is</p>
+<p><span class="math display">\[
+\begin{split}
+Y_{ij} &amp;= \left( \beta_{0} + b_{0j} \right) + \left( \beta_{1} +
+b_{1j} \right)\left( X_{1ij} - {\overline{X}}_{1j} \right) +
+\beta_{2}\left( X_{2ij} - {\overline{X}}_{2} \right) \\
+&amp;\phantom{=}+ \ \beta_{3}\left( Z_{1j} - {\overline{Z}}_{1} \right)
++ \ \beta_{4}\left( Z_{2j} - {\overline{Z}}_{2} \right) +
+\beta_{5}\left( X_{1ij} - {\overline{X}}_{1j} \right)\left( Z_{1j} -
+{\overline{Z}}_{1} \right) + \varepsilon_{ij}\\[1em]
+\mathbf{b}_{j}\ &amp;\sim\ N\left( 0,\mathbf{\Sigma}_{\mathbf{b}}
+\right)\ \ \ \ \ \mathbf{\Sigma}_{\mathbf{b}}=\begin{pmatrix}
+\sigma_{b_{0}}^{2} &amp; \\
+\sigma_{b_{1},b_{0}} &amp; \sigma_{b_{1}}^{2} \\
+\end{pmatrix}\mathbf{\ \ \ \ \ }\varepsilon_{ij}\ \sim\
+N(0,\sigma_{\varepsilon}^{2})
+\end{split}
+\]</span></p>
+<p>where <span class="math inline">\(Y_{ij}\)</span> is the outcome
+score for observation <em>i</em> in cluster <em>j</em>, <span class="math inline">\(X_{1ij}\)</span> is a focal within-cluster
+predictor, <span class="math inline">\({\overline{X}}_{1j}\)</span> is
+the variable’s level-2 cluster mean, <span class="math inline">\(X_{2ij}\)</span> is a grand mean centered level-1
+covariate, <span class="math inline">\(Z_{1j}\)</span> is a level-2
+moderator score for cluster <em>j</em>, and <span class="math inline">\(Z_{2j}\)</span> is a level-2 covariate. Turning to
+the residual terms, <span class="math inline">\(b_{0j}\)</span> and
+<span class="math inline">\(b_{1j}\)</span> are between-cluster random
+effects that capture residual variation in the cluster-specific
+intercepts and slopes, and <span class="math inline">\(\varepsilon_{ij}\)</span> is a within-cluster
+residual. By assumption, the random effects follow a multivariate normal
+distribution with a between-cluster covariance matrix <span class="math inline">\(\mathbf{\Sigma}_{\mathbf{b}}\)</span>, and
+within-cluster residuals are normal with constant variance <span class="math inline">\(\sigma_{\varepsilon}^{2}\)</span>.</p>
+<p>Importantly, group mean centering <span class="math inline">\(X_{1}\)</span> yields a pure within-cluster
+predictor, whereas grand mean centering <span class="math inline">\(X_{2}\)</span> gives a predictor with two sources
+of variation. Although it need not be true in practice, the within- and
+between-cluster parts of any level-1 predictor variables with non-zero
+intraclass correlations share a common slope coefficient. To simplify
+notation, Equation 1 can be rewritten as</p>
+<p><span class="math display">\[Y_{ij} = \left( \beta_{0} + b_{0j}
+\right) + \left( \beta_{1} + b_{1j} \right)X_{1ij}^{w} + \beta_{2}\left(
+X_{2ij}^{w} + X_{2j}^{b} \right) + \beta_{3}Z_{1j}^{b} +
+\beta_{4}Z_{2j}^{b} + \beta_{5}X_{1ij}^{w}Z_{1j}^{b} +
+\varepsilon_{ij}\]</span></p>
+<p>where the <em>w</em> and <em>b</em> superscripts reference within-
+and between-cluster deviation scores, respectively.</p>
+<p>The key inputs to the model object are the unconditional intraclass
+correlation and effect size values. This illustration investigates power
+for intraclass correlation values of .10 and .25. The within- and
+between-cluster fixed effects are set to <span class="math inline">\(R_{w}^{2}\)</span> = .065 and <span class="math inline">\(R_{b}^{2}\)</span> = .065, respectively, the sum
+of which corresponds to Cohen’s (1988) medium effect size benchmark.
+Note that <span class="math inline">\(R_{b}^{2}\)</span> cannot exceed
+the outcome’s intraclass correlation, as this would imply that
+between-cluster predictors explain more than 100% of the available
+variance. Following conventional wisdom that interaction effects tend to
+produce small effects (Aguinis, Beaty, Boik, &amp; Pierce, 2005;
+Chaplin, 1991), the cross-level product is assigned <span class="math inline">\(R_{p}^{2}\)</span> = .01. Finally, the random
+coefficient effect size is set to <span class="math inline">\(R_{rc}^{2}\)</span> = .03 based on values from
+Table 2 in Enders, Keller, and Woller (2023).</p>
+<p>By default, <code>mlmpower</code> assigns equal weights to all
+quantities contributing to a particular source of variance. To assign
+non-uniform weights, assume <span class="math inline">\(X_{1}\)</span>
+and <span class="math inline">\(Z_{1}\)</span> (the interacting
+variables) are the focal predictors and <span class="math inline">\(X_{2}\)</span> and <span class="math inline">\(Z_{2}\)</span> are covariates. To mimic a
+situation where the covariates explain a small amount of variation, the
+fixed effect <span class="math inline">\(R^{2}\)</span> values are
+predominantly allocated to the focal predictors using weights of .80 and
+.20. A small covariate allocation could be appropriate for a set of
+background or sociodemographic characteristics that weakly predict the
+outcome. Researchers often need power estimates for individual partial
+regression slopes. Although the weights do not exactly carve <span class="math inline">\(R_{w}^{2}\)</span> and <span class="math inline">\(R_{b}^{2}\)</span> into additive components when
+predictors are correlated, adopting weak associations among the
+regressors allows us to infer that each focal predictor roughly accounts
+for 5% of the explained variation at each level (i.e., <span class="math inline">\(.80 \times R_{w}^{2}\)</span> or <span class="math inline">\(R_{b}^{2} \approx .05\)</span>).</p>
+<p>The following code block shows the <code>mlmpower</code> model object
+for the example.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>example1 <span class="ot">&lt;-</span> (</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>    <span class="fu">effect_size</span>(</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>        <span class="at">icc          =</span> <span class="fu">c</span>(.<span class="dv">10</span>, .<span class="dv">25</span>),</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>        <span class="at">within       =</span> .<span class="dv">065</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>        <span class="at">between      =</span> .<span class="dv">065</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>        <span class="at">product      =</span> .<span class="dv">01</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>        <span class="at">random_slope =</span> .<span class="dv">03</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>    )</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">outcome</span>(<span class="st">&#39;y&#39;</span>, <span class="at">mean =</span> <span class="dv">50</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">within_predictor</span>(<span class="st">&#39;x1&#39;</span>, <span class="at">icc =</span> <span class="dv">0</span>, <span class="at">weight =</span> .<span class="dv">80</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">within_predictor</span>(<span class="st">&#39;x2&#39;</span>, <span class="at">weight =</span> .<span class="dv">20</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">between_predictor</span>(<span class="st">&#39;z1&#39;</span>, <span class="at">weight =</span> .<span class="dv">80</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">between_predictor</span>(<span class="st">&#39;z2&#39;</span>, <span class="at">weight =</span> .<span class="dv">20</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">product</span>(<span class="st">&#39;x1&#39;</span>,<span class="st">&#39;z1&#39;</span>, <span class="at">weight =</span> <span class="dv">1</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">random_slope</span>(<span class="st">&#39;x1&#39;</span>, <span class="at">weight =</span> <span class="dv">1</span>)</span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>)</span></code></pre></div>
+<p>The <code>mlmpower</code> package groups <span class="math inline">\(R^{2}\)</span> values and intraclass correlations
+into a single object called effect_size(), with the five inputs
+separated by commas. The within argument corresponds to <span class="math inline">\(R_{w}^{2}\)</span>, the between argument aligns
+with <span class="math inline">\(R_{b}^{2}\)</span>, the product
+argument specifies <span class="math inline">\(R_{p}^{2}\)</span>, and
+the random_slope argument corresponds to <span class="math inline">\(R_{rc}^{2}\)</span>. The icc argument assigns a
+global intraclass correlation to all level-1 variables, and separate
+simulations are performed for each requested level.</p>
+<p>Variable attributes are referenced by adding the following objects:
+<code>outcome()</code>, <code>within_predictor()</code>,
+<code>between_predictor()</code>, <code>product()</code>, and
+<code>random_slope()</code>. All five objects have an argument for the
+variable name, weight (<code>weight =</code>), mean
+(<code>mean =</code>), and standard deviation (<code>sd =</code>).
+Level-1 variables additionally have an intraclass correlation argument
+(<code>icc =</code>) that supersedes the global setting in
+<code>effect_size()</code>.</p>
+<p>The previous code block assigns explicit weights to all variables
+contributing to a given effect. The unit weights in the
+<code>product()</code> and <code>random_slope()</code> objects result
+from a single variable determining those sources of variation. Next, the
+<code>within_predictor(&#39;x1&#39;, icc = 0, weight = .80)</code> object
+overrides the global intraclass correlation setting, defining <span class="math inline">\(X_{1}\)</span> as a pure within-cluster deviation
+variable with no between-cluster variation. Finally, with the exception
+of the outcome variable, which has a mean and standard deviation of 50
+and 10, the script accepts the default settings for the means and
+variances of the predictors (0 and 1, respectively).</p>
+<p>The multilevel model parameters also require three sets of
+correlations: within-cluster correlations among level-1 predictors,
+between-cluster correlations among level-2 predictors, and random effect
+correlations. These correlations are optional, but they can specified
+using the <code>correlations()</code> object. The earlier code block
+omits this object, thereby accepting the default specification. When the
+<code>correlations()</code> object is omitted, the <code>mlmpower</code>
+package iteratively samples all correlations from a uniform distribution
+between .10 and .30, such that the resulting power estimates average
+over a distribution of possible associations. This default range spans
+Cohen’s (1988) small to medium effect size benchmarks, and it brackets
+common correlation values from published research (Bosco, Aguinis,
+Singh, Field, &amp; Pierce, 2015; Funder &amp; Ozer, 2019; Gignac &amp;
+Szodorai, 2016).</p>
+<p>The default specifications could be invoked by explicitly appending
+the <code>correlations()</code> object to the earlier script, as
+follows.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>example1 <span class="ot">&lt;-</span> (</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>    <span class="fu">effect_size</span>(</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>        <span class="at">icc          =</span> <span class="fu">c</span>(.<span class="dv">10</span>, .<span class="dv">25</span>),</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>        <span class="at">within       =</span> .<span class="dv">065</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>        <span class="at">between      =</span> .<span class="dv">065</span>,</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>        <span class="at">product      =</span> .<span class="dv">01</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>        <span class="at">random_slope =</span> .<span class="dv">03</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>    )</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">outcome</span>(<span class="st">&#39;y&#39;</span>, <span class="at">mean =</span> <span class="dv">50</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">within_predictor</span>(<span class="st">&#39;x1&#39;</span>, <span class="at">icc =</span> <span class="dv">0</span>, <span class="at">weight =</span> .<span class="dv">80</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">within_predictor</span>(<span class="st">&#39;x2&#39;</span>, <span class="at">weight =</span> .<span class="dv">20</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">between_predictor</span>(<span class="st">&#39;z1&#39;</span>, <span class="at">weight =</span> .<span class="dv">80</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">between_predictor</span>(<span class="st">&#39;z2&#39;</span>, <span class="at">weight =</span> .<span class="dv">20</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">product</span>(<span class="st">&#39;x1&#39;</span>,<span class="st">&#39;z1&#39;</span>, <span class="at">weight =</span> <span class="dv">1</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">random_slope</span>(<span class="st">&#39;x1&#39;</span>, <span class="at">weight =</span> <span class="dv">1</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">correlations</span>(</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>        <span class="at">within  =</span> <span class="fu">random</span>(<span class="fl">0.1</span>, <span class="fl">0.3</span>),</span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>        <span class="at">between =</span> <span class="fu">random</span>(<span class="fl">0.1</span>, <span class="fl">0.3</span>),</span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a>        <span class="at">randeff =</span> <span class="fu">random</span>(<span class="fl">0.1</span>, <span class="fl">0.3</span>)</span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>    )</span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>)</span></code></pre></div>
+<p>Researchers can modify the upper and lower limits of each correlation
+range, or they can specify a constant correlation by inputting a scalar
+value. For example, specifying <code>randeff = 0</code> would define
+<span class="math inline">\(\mathbf{\Sigma}_{\mathbf{b}}\)</span> as a
+diagonal matrix. The illustrative simulations presented in Enders et
+al. (2023) suggest that predictor and random effect correlations tend
+not to matter very much.</p>
+<p>It may be instructive to inspect the population parameters prior to
+running the simulation. Executing <code>summary(example1)</code> returns
+tabular summaries of the multilevel model parameters.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">summary</span>(example1)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#&gt; ! Parameters are solved based on average correlation.</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt; $`icc = 0.1`</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; $r2</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt;                                           Proportion</span></span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; Variance Within-Cluster Fixed Effects    0.065000000</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; Variance Cross-Level Interaction Effects 0.010000000</span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; Variance Random Slopes                   0.030000000</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a><span class="co">#&gt; Within-Cluster Error Variance            0.795000000</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co">#&gt; Variance Between-Cluster Fixed Effects   0.071476494</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a><span class="co">#&gt; Incremental Variance Level-2 Predictors  0.065000000</span></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co">#&gt; Between Variance Level-1 Covariates      0.006476494</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a><span class="co">#&gt; Variance Random Intercepts               0.028523506</span></span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a><span class="co">#&gt; $phi_b</span></span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a><span class="co">#&gt;            x2_b         z1         z2</span></span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a><span class="co">#&gt; x2_b 0.10000000 0.06324555 0.06324555</span></span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a><span class="co">#&gt; z1   0.06324555 1.00000000 0.20000000</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a><span class="co">#&gt; z2   0.06324555 0.20000000 1.00000000</span></span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a><span class="co">#&gt; $phi_p</span></span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a><span class="co">#&gt;         x1_w*z1</span></span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a><span class="co">#&gt; x1_w*z1       1</span></span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a><span class="co">#&gt; $phi_w</span></span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a><span class="co">#&gt;           x1_w      x2_w</span></span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a><span class="co">#&gt; x1_w 1.0000000 0.1897367</span></span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a><span class="co">#&gt; x2_w 0.1897367 0.9000000</span></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="co">#&gt; $mean_Z</span></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a><span class="co">#&gt; z1 z2 </span></span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a><span class="co">#&gt;  0  0 </span></span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a><span class="co">#&gt; $mean_X</span></span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a><span class="co">#&gt; x1 x2 </span></span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a><span class="co">#&gt;  0  0 </span></span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a><span class="co">#&gt; $var_e</span></span>
+<span id="cb3-39"><a href="#cb3-39" tabindex="-1"></a><span class="co">#&gt;           Value</span></span>
+<span id="cb3-40"><a href="#cb3-40" tabindex="-1"></a><span class="co">#&gt; Res. Var.  79.5</span></span>
+<span id="cb3-41"><a href="#cb3-41" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-42"><a href="#cb3-42" tabindex="-1"></a><span class="co">#&gt; $tau</span></span>
+<span id="cb3-43"><a href="#cb3-43" tabindex="-1"></a><span class="co">#&gt;           Icept      x1_w</span></span>
+<span id="cb3-44"><a href="#cb3-44" tabindex="-1"></a><span class="co">#&gt; Icept 2.8523506 0.5850488</span></span>
+<span id="cb3-45"><a href="#cb3-45" tabindex="-1"></a><span class="co">#&gt; x1_w  0.5850488 3.0000000</span></span>
+<span id="cb3-46"><a href="#cb3-46" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-47"><a href="#cb3-47" tabindex="-1"></a><span class="co">#&gt; $gammas</span></span>
+<span id="cb3-48"><a href="#cb3-48" tabindex="-1"></a><span class="co">#&gt;              Value</span></span>
+<span id="cb3-49"><a href="#cb3-49" tabindex="-1"></a><span class="co">#&gt; Icept   50.0000000</span></span>
+<span id="cb3-50"><a href="#cb3-50" tabindex="-1"></a><span class="co">#&gt; x1_w     2.3646137</span></span>
+<span id="cb3-51"><a href="#cb3-51" tabindex="-1"></a><span class="co">#&gt; x2_w     0.6231304</span></span>
+<span id="cb3-52"><a href="#cb3-52" tabindex="-1"></a><span class="co">#&gt; x1_w*z1  1.0000000</span></span>
+<span id="cb3-53"><a href="#cb3-53" tabindex="-1"></a><span class="co">#&gt; x2_b     0.6231304</span></span>
+<span id="cb3-54"><a href="#cb3-54" tabindex="-1"></a><span class="co">#&gt; z1       2.4308622</span></span>
+<span id="cb3-55"><a href="#cb3-55" tabindex="-1"></a><span class="co">#&gt; z2       0.6077155</span></span>
+<span id="cb3-56"><a href="#cb3-56" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-57"><a href="#cb3-57" tabindex="-1"></a><span class="co">#&gt; $mean_Y</span></span>
+<span id="cb3-58"><a href="#cb3-58" tabindex="-1"></a><span class="co">#&gt;  y </span></span>
+<span id="cb3-59"><a href="#cb3-59" tabindex="-1"></a><span class="co">#&gt; 50 </span></span>
+<span id="cb3-60"><a href="#cb3-60" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-61"><a href="#cb3-61" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-62"><a href="#cb3-62" tabindex="-1"></a><span class="co">#&gt; $`icc = 0.25`</span></span>
+<span id="cb3-63"><a href="#cb3-63" tabindex="-1"></a><span class="co">#&gt; $r2</span></span>
+<span id="cb3-64"><a href="#cb3-64" tabindex="-1"></a><span class="co">#&gt;                                           Proportion</span></span>
+<span id="cb3-65"><a href="#cb3-65" tabindex="-1"></a><span class="co">#&gt; Variance Within-Cluster Fixed Effects    0.065000000</span></span>
+<span id="cb3-66"><a href="#cb3-66" tabindex="-1"></a><span class="co">#&gt; Variance Cross-Level Interaction Effects 0.010000000</span></span>
+<span id="cb3-67"><a href="#cb3-67" tabindex="-1"></a><span class="co">#&gt; Variance Random Slopes                   0.030000000</span></span>
+<span id="cb3-68"><a href="#cb3-68" tabindex="-1"></a><span class="co">#&gt; Within-Cluster Error Variance            0.645000000</span></span>
+<span id="cb3-69"><a href="#cb3-69" tabindex="-1"></a><span class="co">#&gt; Variance Between-Cluster Fixed Effects   0.074006354</span></span>
+<span id="cb3-70"><a href="#cb3-70" tabindex="-1"></a><span class="co">#&gt; Incremental Variance Level-2 Predictors  0.065000000</span></span>
+<span id="cb3-71"><a href="#cb3-71" tabindex="-1"></a><span class="co">#&gt; Between Variance Level-1 Covariates      0.009006354</span></span>
+<span id="cb3-72"><a href="#cb3-72" tabindex="-1"></a><span class="co">#&gt; Variance Random Intercepts               0.175993646</span></span>
+<span id="cb3-73"><a href="#cb3-73" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-74"><a href="#cb3-74" tabindex="-1"></a><span class="co">#&gt; $phi_b</span></span>
+<span id="cb3-75"><a href="#cb3-75" tabindex="-1"></a><span class="co">#&gt;      x2_b  z1  z2</span></span>
+<span id="cb3-76"><a href="#cb3-76" tabindex="-1"></a><span class="co">#&gt; x2_b 0.25 0.1 0.1</span></span>
+<span id="cb3-77"><a href="#cb3-77" tabindex="-1"></a><span class="co">#&gt; z1   0.10 1.0 0.2</span></span>
+<span id="cb3-78"><a href="#cb3-78" tabindex="-1"></a><span class="co">#&gt; z2   0.10 0.2 1.0</span></span>
+<span id="cb3-79"><a href="#cb3-79" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-80"><a href="#cb3-80" tabindex="-1"></a><span class="co">#&gt; $phi_p</span></span>
+<span id="cb3-81"><a href="#cb3-81" tabindex="-1"></a><span class="co">#&gt;         x1_w*z1</span></span>
+<span id="cb3-82"><a href="#cb3-82" tabindex="-1"></a><span class="co">#&gt; x1_w*z1       1</span></span>
+<span id="cb3-83"><a href="#cb3-83" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-84"><a href="#cb3-84" tabindex="-1"></a><span class="co">#&gt; $phi_w</span></span>
+<span id="cb3-85"><a href="#cb3-85" tabindex="-1"></a><span class="co">#&gt;           x1_w      x2_w</span></span>
+<span id="cb3-86"><a href="#cb3-86" tabindex="-1"></a><span class="co">#&gt; x1_w 1.0000000 0.1732051</span></span>
+<span id="cb3-87"><a href="#cb3-87" tabindex="-1"></a><span class="co">#&gt; x2_w 0.1732051 0.7500000</span></span>
+<span id="cb3-88"><a href="#cb3-88" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-89"><a href="#cb3-89" tabindex="-1"></a><span class="co">#&gt; $mean_Z</span></span>
+<span id="cb3-90"><a href="#cb3-90" tabindex="-1"></a><span class="co">#&gt; z1 z2 </span></span>
+<span id="cb3-91"><a href="#cb3-91" tabindex="-1"></a><span class="co">#&gt;  0  0 </span></span>
+<span id="cb3-92"><a href="#cb3-92" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-93"><a href="#cb3-93" tabindex="-1"></a><span class="co">#&gt; $mean_X</span></span>
+<span id="cb3-94"><a href="#cb3-94" tabindex="-1"></a><span class="co">#&gt; x1 x2 </span></span>
+<span id="cb3-95"><a href="#cb3-95" tabindex="-1"></a><span class="co">#&gt;  0  0 </span></span>
+<span id="cb3-96"><a href="#cb3-96" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-97"><a href="#cb3-97" tabindex="-1"></a><span class="co">#&gt; $var_e</span></span>
+<span id="cb3-98"><a href="#cb3-98" tabindex="-1"></a><span class="co">#&gt;           Value</span></span>
+<span id="cb3-99"><a href="#cb3-99" tabindex="-1"></a><span class="co">#&gt; Res. Var.  64.5</span></span>
+<span id="cb3-100"><a href="#cb3-100" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-101"><a href="#cb3-101" tabindex="-1"></a><span class="co">#&gt; $tau</span></span>
+<span id="cb3-102"><a href="#cb3-102" tabindex="-1"></a><span class="co">#&gt;           Icept     x1_w</span></span>
+<span id="cb3-103"><a href="#cb3-103" tabindex="-1"></a><span class="co">#&gt; Icept 17.599365 1.453246</span></span>
+<span id="cb3-104"><a href="#cb3-104" tabindex="-1"></a><span class="co">#&gt; x1_w   1.453246 3.000000</span></span>
+<span id="cb3-105"><a href="#cb3-105" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-106"><a href="#cb3-106" tabindex="-1"></a><span class="co">#&gt; $gammas</span></span>
+<span id="cb3-107"><a href="#cb3-107" tabindex="-1"></a><span class="co">#&gt;              Value</span></span>
+<span id="cb3-108"><a href="#cb3-108" tabindex="-1"></a><span class="co">#&gt; Icept   50.0000000</span></span>
+<span id="cb3-109"><a href="#cb3-109" tabindex="-1"></a><span class="co">#&gt; x1_w     2.3646137</span></span>
+<span id="cb3-110"><a href="#cb3-110" tabindex="-1"></a><span class="co">#&gt; x2_w     0.6826052</span></span>
+<span id="cb3-111"><a href="#cb3-111" tabindex="-1"></a><span class="co">#&gt; x1_w*z1  1.0000000</span></span>
+<span id="cb3-112"><a href="#cb3-112" tabindex="-1"></a><span class="co">#&gt; x2_b     0.6826052</span></span>
+<span id="cb3-113"><a href="#cb3-113" tabindex="-1"></a><span class="co">#&gt; z1       2.4308622</span></span>
+<span id="cb3-114"><a href="#cb3-114" tabindex="-1"></a><span class="co">#&gt; z2       0.6077155</span></span>
+<span id="cb3-115"><a href="#cb3-115" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb3-116"><a href="#cb3-116" tabindex="-1"></a><span class="co">#&gt; $mean_Y</span></span>
+<span id="cb3-117"><a href="#cb3-117" tabindex="-1"></a><span class="co">#&gt;  y </span></span>
+<span id="cb3-118"><a href="#cb3-118" tabindex="-1"></a><span class="co">#&gt; 50</span></span></code></pre></div>
+<p>Having specified the target model, you next use the
+<code>power_analysis()</code> function to conduct simulations. The
+function requires four inputs: the model argument specifies the
+parameter value object (e.g., <code>example1</code>), the replications
+input specifies the number of artificial data sets,
+<code>n_between</code> is a vector of level-2 sample sizes, and
+<code>n_within</code> is a vector of level-1 sample sizes (i.e., the
+number of observations per cluster). The code block below pairs four
+level-2 sample size values (<span class="math inline">\(J\)</span> = 30,
+60, 90, and 120) with three level-1 sample sizes (<span class="math inline">\(n_{j}\)</span> = 10, 20, or 30 observations per
+cluster), and it requests 2,000 artificial data sets for each
+combination.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Set seed for replicable results</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2318971</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co"># Run Power Analysis</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>powersim1 <span class="ot">&lt;-</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>    <span class="fu">power_analysis</span>(</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>        <span class="at">model =</span> example1,</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>        <span class="at">replications =</span> <span class="dv">2000</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>        <span class="at">n_between =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">60</span>, <span class="dv">90</span>, <span class="dv">120</span>),</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>        <span class="at">n_within =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>    )</span></code></pre></div>
+<p>The package uses <code>lme4</code> (Bates et al., 2021) for model
+fitting, and it defaults to an alpha level of .05 for all significance
+tests. Significance tests of random slope variation use a likelihood
+ratio test with a mixture chi-square reference distribution (i.e., a
+chi-bar distribution; Snijders &amp; Bosker, 2012, p. 99), as
+implemented in the <code>varTestnlme</code> package (Baey &amp; Kuhn,
+2022). Executing <code>summary(powersim1)</code> returns the tabular
+summaries of the simulation results shown</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">summary</span>(powersim1)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; ── Power Analysis Specification ──</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; Replications = 2000</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt; N_Within = 10, 20, and 30</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt; N_Between = 30, 60, 90, and 120</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt; ── lme4 Model Syntax</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; y ~ 1 + cwc(x1) + cgm(x2) + cwc(x1):cgm(z1) + cgm(z1) + cgm(z2) + (1 + cwc(x1)</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt; | `_id`)</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; ℹ cwc() = centering within cluster</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt; ℹ cgm() = centering with grand mean</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt; ── Effect Sizes</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt; • WITHIN = 0.065</span></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="co">#&gt; • BETWEEN = 0.065</span></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="co">#&gt; • RANDOM SLOPE = 0.03</span></span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="co">#&gt; • PRODUCT = 0.01</span></span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a><span class="co">#&gt; ── Power Analysis Results ──</span></span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.1, n_within = 10, n_between = 30</span></span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         0.92 ± 0.01</span></span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.21 ± 0.02</span></span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         0.92 ± 0.01</span></span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.15 ± 0.02</span></span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.30 ± 0.02</span></span>
+<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     0.16 ± 0.02</span></span>
+<span id="cb5-35"><a href="#cb5-35" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-36"><a href="#cb5-36" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.25, n_within = 10, n_between = 30</span></span>
+<span id="cb5-37"><a href="#cb5-37" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-38"><a href="#cb5-38" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-39"><a href="#cb5-39" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         0.96 ± 0.01</span></span>
+<span id="cb5-40"><a href="#cb5-40" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.23 ± 0.02</span></span>
+<span id="cb5-41"><a href="#cb5-41" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         0.67 ± 0.02</span></span>
+<span id="cb5-42"><a href="#cb5-42" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.10 ± 0.01</span></span>
+<span id="cb5-43"><a href="#cb5-43" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.34 ± 0.02</span></span>
+<span id="cb5-44"><a href="#cb5-44" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     0.22 ± 0.02</span></span>
+<span id="cb5-45"><a href="#cb5-45" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-46"><a href="#cb5-46" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.1, n_within = 20, n_between = 30</span></span>
+<span id="cb5-47"><a href="#cb5-47" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-48"><a href="#cb5-48" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-49"><a href="#cb5-49" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-50"><a href="#cb5-50" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.36 ± 0.02</span></span>
+<span id="cb5-51"><a href="#cb5-51" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         0.98 ± 0.01</span></span>
+<span id="cb5-52"><a href="#cb5-52" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.21 ± 0.02</span></span>
+<span id="cb5-53"><a href="#cb5-53" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.48 ± 0.02</span></span>
+<span id="cb5-54"><a href="#cb5-54" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     0.45 ± 0.02</span></span>
+<span id="cb5-55"><a href="#cb5-55" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-56"><a href="#cb5-56" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.25, n_within = 20, n_between = 30</span></span>
+<span id="cb5-57"><a href="#cb5-57" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-58"><a href="#cb5-58" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-59"><a href="#cb5-59" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-60"><a href="#cb5-60" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.43 ± 0.02</span></span>
+<span id="cb5-61"><a href="#cb5-61" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         0.73 ± 0.02</span></span>
+<span id="cb5-62"><a href="#cb5-62" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.11 ± 0.01</span></span>
+<span id="cb5-63"><a href="#cb5-63" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.54 ± 0.02</span></span>
+<span id="cb5-64"><a href="#cb5-64" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     0.60 ± 0.02</span></span>
+<span id="cb5-65"><a href="#cb5-65" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-66"><a href="#cb5-66" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.1, n_within = 30, n_between = 30</span></span>
+<span id="cb5-67"><a href="#cb5-67" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-68"><a href="#cb5-68" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-69"><a href="#cb5-69" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-70"><a href="#cb5-70" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.51 ± 0.02</span></span>
+<span id="cb5-71"><a href="#cb5-71" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         0.99 ± 0.00</span></span>
+<span id="cb5-72"><a href="#cb5-72" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.27 ± 0.02</span></span>
+<span id="cb5-73"><a href="#cb5-73" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.59 ± 0.02</span></span>
+<span id="cb5-74"><a href="#cb5-74" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     0.73 ± 0.02</span></span>
+<span id="cb5-75"><a href="#cb5-75" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-76"><a href="#cb5-76" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.25, n_within = 30, n_between = 30</span></span>
+<span id="cb5-77"><a href="#cb5-77" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-78"><a href="#cb5-78" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-79"><a href="#cb5-79" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-80"><a href="#cb5-80" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.57 ± 0.02</span></span>
+<span id="cb5-81"><a href="#cb5-81" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         0.74 ± 0.02</span></span>
+<span id="cb5-82"><a href="#cb5-82" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.12 ± 0.01</span></span>
+<span id="cb5-83"><a href="#cb5-83" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.61 ± 0.02</span></span>
+<span id="cb5-84"><a href="#cb5-84" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     0.83 ± 0.02</span></span>
+<span id="cb5-85"><a href="#cb5-85" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-86"><a href="#cb5-86" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.1, n_within = 10, n_between = 60</span></span>
+<span id="cb5-87"><a href="#cb5-87" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-88"><a href="#cb5-88" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-89"><a href="#cb5-89" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-90"><a href="#cb5-90" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.40 ± 0.02</span></span>
+<span id="cb5-91"><a href="#cb5-91" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         1.00 ± 0.00</span></span>
+<span id="cb5-92"><a href="#cb5-92" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.26 ± 0.02</span></span>
+<span id="cb5-93"><a href="#cb5-93" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.57 ± 0.02</span></span>
+<span id="cb5-94"><a href="#cb5-94" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     0.33 ± 0.02</span></span>
+<span id="cb5-95"><a href="#cb5-95" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-96"><a href="#cb5-96" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.25, n_within = 10, n_between = 60</span></span>
+<span id="cb5-97"><a href="#cb5-97" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-98"><a href="#cb5-98" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-99"><a href="#cb5-99" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-100"><a href="#cb5-100" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.44 ± 0.02</span></span>
+<span id="cb5-101"><a href="#cb5-101" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         0.94 ± 0.01</span></span>
+<span id="cb5-102"><a href="#cb5-102" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.14 ± 0.02</span></span>
+<span id="cb5-103"><a href="#cb5-103" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.63 ± 0.02</span></span>
+<span id="cb5-104"><a href="#cb5-104" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     0.44 ± 0.02</span></span>
+<span id="cb5-105"><a href="#cb5-105" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-106"><a href="#cb5-106" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.1, n_within = 20, n_between = 60</span></span>
+<span id="cb5-107"><a href="#cb5-107" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-108"><a href="#cb5-108" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-109"><a href="#cb5-109" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-110"><a href="#cb5-110" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.63 ± 0.02</span></span>
+<span id="cb5-111"><a href="#cb5-111" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         1.00 ± 0.00</span></span>
+<span id="cb5-112"><a href="#cb5-112" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.39 ± 0.02</span></span>
+<span id="cb5-113"><a href="#cb5-113" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.78 ± 0.02</span></span>
+<span id="cb5-114"><a href="#cb5-114" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     0.77 ± 0.02</span></span>
+<span id="cb5-115"><a href="#cb5-115" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-116"><a href="#cb5-116" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.25, n_within = 20, n_between = 60</span></span>
+<span id="cb5-117"><a href="#cb5-117" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-118"><a href="#cb5-118" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-119"><a href="#cb5-119" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-120"><a href="#cb5-120" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.71 ± 0.02</span></span>
+<span id="cb5-121"><a href="#cb5-121" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         0.95 ± 0.01</span></span>
+<span id="cb5-122"><a href="#cb5-122" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.18 ± 0.02</span></span>
+<span id="cb5-123"><a href="#cb5-123" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.82 ± 0.02</span></span>
+<span id="cb5-124"><a href="#cb5-124" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     0.88 ± 0.01</span></span>
+<span id="cb5-125"><a href="#cb5-125" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-126"><a href="#cb5-126" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.1, n_within = 30, n_between = 60</span></span>
+<span id="cb5-127"><a href="#cb5-127" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-128"><a href="#cb5-128" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-129"><a href="#cb5-129" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-130"><a href="#cb5-130" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.81 ± 0.02</span></span>
+<span id="cb5-131"><a href="#cb5-131" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         1.00 ± 0.00</span></span>
+<span id="cb5-132"><a href="#cb5-132" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.47 ± 0.02</span></span>
+<span id="cb5-133"><a href="#cb5-133" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.87 ± 0.01</span></span>
+<span id="cb5-134"><a href="#cb5-134" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     0.95 ± 0.01</span></span>
+<span id="cb5-135"><a href="#cb5-135" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-136"><a href="#cb5-136" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.25, n_within = 30, n_between = 60</span></span>
+<span id="cb5-137"><a href="#cb5-137" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-138"><a href="#cb5-138" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-139"><a href="#cb5-139" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-140"><a href="#cb5-140" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.86 ± 0.02</span></span>
+<span id="cb5-141"><a href="#cb5-141" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         0.97 ± 0.01</span></span>
+<span id="cb5-142"><a href="#cb5-142" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.17 ± 0.02</span></span>
+<span id="cb5-143"><a href="#cb5-143" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.89 ± 0.01</span></span>
+<span id="cb5-144"><a href="#cb5-144" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     0.99 ± 0.00</span></span>
+<span id="cb5-145"><a href="#cb5-145" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-146"><a href="#cb5-146" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.1, n_within = 10, n_between = 90</span></span>
+<span id="cb5-147"><a href="#cb5-147" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-148"><a href="#cb5-148" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-149"><a href="#cb5-149" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-150"><a href="#cb5-150" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.54 ± 0.02</span></span>
+<span id="cb5-151"><a href="#cb5-151" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         1.00 ± 0.00</span></span>
+<span id="cb5-152"><a href="#cb5-152" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.36 ± 0.02</span></span>
+<span id="cb5-153"><a href="#cb5-153" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.73 ± 0.02</span></span>
+<span id="cb5-154"><a href="#cb5-154" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     0.47 ± 0.02</span></span>
+<span id="cb5-155"><a href="#cb5-155" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-156"><a href="#cb5-156" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.25, n_within = 10, n_between = 90</span></span>
+<span id="cb5-157"><a href="#cb5-157" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-158"><a href="#cb5-158" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-159"><a href="#cb5-159" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-160"><a href="#cb5-160" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.57 ± 0.02</span></span>
+<span id="cb5-161"><a href="#cb5-161" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         0.99 ± 0.00</span></span>
+<span id="cb5-162"><a href="#cb5-162" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.21 ± 0.02</span></span>
+<span id="cb5-163"><a href="#cb5-163" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.82 ± 0.02</span></span>
+<span id="cb5-164"><a href="#cb5-164" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     0.60 ± 0.02</span></span>
+<span id="cb5-165"><a href="#cb5-165" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-166"><a href="#cb5-166" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.1, n_within = 20, n_between = 90</span></span>
+<span id="cb5-167"><a href="#cb5-167" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-168"><a href="#cb5-168" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-169"><a href="#cb5-169" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-170"><a href="#cb5-170" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.80 ± 0.02</span></span>
+<span id="cb5-171"><a href="#cb5-171" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         1.00 ± 0.00</span></span>
+<span id="cb5-172"><a href="#cb5-172" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.54 ± 0.02</span></span>
+<span id="cb5-173"><a href="#cb5-173" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.92 ± 0.01</span></span>
+<span id="cb5-174"><a href="#cb5-174" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     0.92 ± 0.01</span></span>
+<span id="cb5-175"><a href="#cb5-175" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-176"><a href="#cb5-176" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.25, n_within = 20, n_between = 90</span></span>
+<span id="cb5-177"><a href="#cb5-177" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-178"><a href="#cb5-178" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-179"><a href="#cb5-179" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-180"><a href="#cb5-180" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.86 ± 0.02</span></span>
+<span id="cb5-181"><a href="#cb5-181" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         1.00 ± 0.00</span></span>
+<span id="cb5-182"><a href="#cb5-182" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.21 ± 0.02</span></span>
+<span id="cb5-183"><a href="#cb5-183" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.95 ± 0.01</span></span>
+<span id="cb5-184"><a href="#cb5-184" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     0.98 ± 0.01</span></span>
+<span id="cb5-185"><a href="#cb5-185" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-186"><a href="#cb5-186" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.1, n_within = 30, n_between = 90</span></span>
+<span id="cb5-187"><a href="#cb5-187" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-188"><a href="#cb5-188" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-189"><a href="#cb5-189" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-190"><a href="#cb5-190" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.93 ± 0.01</span></span>
+<span id="cb5-191"><a href="#cb5-191" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         1.00 ± 0.00</span></span>
+<span id="cb5-192"><a href="#cb5-192" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.65 ± 0.02</span></span>
+<span id="cb5-193"><a href="#cb5-193" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.97 ± 0.01</span></span>
+<span id="cb5-194"><a href="#cb5-194" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     1.00 ± 0.00</span></span>
+<span id="cb5-195"><a href="#cb5-195" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-196"><a href="#cb5-196" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.25, n_within = 30, n_between = 90</span></span>
+<span id="cb5-197"><a href="#cb5-197" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-198"><a href="#cb5-198" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-199"><a href="#cb5-199" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-200"><a href="#cb5-200" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.96 ± 0.01</span></span>
+<span id="cb5-201"><a href="#cb5-201" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         1.00 ± 0.00</span></span>
+<span id="cb5-202"><a href="#cb5-202" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.24 ± 0.02</span></span>
+<span id="cb5-203"><a href="#cb5-203" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.98 ± 0.01</span></span>
+<span id="cb5-204"><a href="#cb5-204" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     1.00 ± 0.00</span></span>
+<span id="cb5-205"><a href="#cb5-205" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-206"><a href="#cb5-206" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.1, n_within = 10, n_between = 120</span></span>
+<span id="cb5-207"><a href="#cb5-207" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-208"><a href="#cb5-208" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-209"><a href="#cb5-209" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-210"><a href="#cb5-210" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.68 ± 0.02</span></span>
+<span id="cb5-211"><a href="#cb5-211" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         1.00 ± 0.00</span></span>
+<span id="cb5-212"><a href="#cb5-212" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.45 ± 0.02</span></span>
+<span id="cb5-213"><a href="#cb5-213" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.86 ± 0.02</span></span>
+<span id="cb5-214"><a href="#cb5-214" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     0.59 ± 0.02</span></span>
+<span id="cb5-215"><a href="#cb5-215" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-216"><a href="#cb5-216" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.25, n_within = 10, n_between = 120</span></span>
+<span id="cb5-217"><a href="#cb5-217" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-218"><a href="#cb5-218" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-219"><a href="#cb5-219" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-220"><a href="#cb5-220" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.71 ± 0.02</span></span>
+<span id="cb5-221"><a href="#cb5-221" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         1.00 ± 0.00</span></span>
+<span id="cb5-222"><a href="#cb5-222" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.26 ± 0.02</span></span>
+<span id="cb5-223"><a href="#cb5-223" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.91 ± 0.01</span></span>
+<span id="cb5-224"><a href="#cb5-224" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     0.78 ± 0.02</span></span>
+<span id="cb5-225"><a href="#cb5-225" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-226"><a href="#cb5-226" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.1, n_within = 20, n_between = 120</span></span>
+<span id="cb5-227"><a href="#cb5-227" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-228"><a href="#cb5-228" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-229"><a href="#cb5-229" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-230"><a href="#cb5-230" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.91 ± 0.01</span></span>
+<span id="cb5-231"><a href="#cb5-231" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         1.00 ± 0.00</span></span>
+<span id="cb5-232"><a href="#cb5-232" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.64 ± 0.02</span></span>
+<span id="cb5-233"><a href="#cb5-233" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.97 ± 0.01</span></span>
+<span id="cb5-234"><a href="#cb5-234" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     0.97 ± 0.01</span></span>
+<span id="cb5-235"><a href="#cb5-235" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-236"><a href="#cb5-236" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.25, n_within = 20, n_between = 120</span></span>
+<span id="cb5-237"><a href="#cb5-237" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-238"><a href="#cb5-238" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-239"><a href="#cb5-239" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-240"><a href="#cb5-240" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.94 ± 0.01</span></span>
+<span id="cb5-241"><a href="#cb5-241" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         1.00 ± 0.00</span></span>
+<span id="cb5-242"><a href="#cb5-242" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.29 ± 0.02</span></span>
+<span id="cb5-243"><a href="#cb5-243" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.99 ± 0.01</span></span>
+<span id="cb5-244"><a href="#cb5-244" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     0.99 ± 0.00</span></span>
+<span id="cb5-245"><a href="#cb5-245" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-246"><a href="#cb5-246" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.1, n_within = 30, n_between = 120</span></span>
+<span id="cb5-247"><a href="#cb5-247" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-248"><a href="#cb5-248" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-249"><a href="#cb5-249" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-250"><a href="#cb5-250" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.98 ± 0.01</span></span>
+<span id="cb5-251"><a href="#cb5-251" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         1.00 ± 0.00</span></span>
+<span id="cb5-252"><a href="#cb5-252" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.76 ± 0.02</span></span>
+<span id="cb5-253"><a href="#cb5-253" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.99 ± 0.00</span></span>
+<span id="cb5-254"><a href="#cb5-254" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     1.00 ± 0.00</span></span>
+<span id="cb5-255"><a href="#cb5-255" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-256"><a href="#cb5-256" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.25, n_within = 30, n_between = 120</span></span>
+<span id="cb5-257"><a href="#cb5-257" tabindex="-1"></a><span class="co">#&gt;                         Power      </span></span>
+<span id="cb5-258"><a href="#cb5-258" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept)     1.00 ± 0.00</span></span>
+<span id="cb5-259"><a href="#cb5-259" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1)         1.00 ± 0.00</span></span>
+<span id="cb5-260"><a href="#cb5-260" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)         0.99 ± 0.00</span></span>
+<span id="cb5-261"><a href="#cb5-261" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)         1.00 ± 0.00</span></span>
+<span id="cb5-262"><a href="#cb5-262" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)         0.30 ± 0.02</span></span>
+<span id="cb5-263"><a href="#cb5-263" tabindex="-1"></a><span class="co">#&gt; Fixed:  cwc(x1):cgm(z1) 0.99 ± 0.00</span></span>
+<span id="cb5-264"><a href="#cb5-264" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test     1.00 ± 0.00</span></span>
+<span id="cb5-265"><a href="#cb5-265" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-266"><a href="#cb5-266" tabindex="-1"></a><span class="co">#&gt; ℹ Margin of error (MOE) computed as ± 1.96 * standard error</span></span></code></pre></div>
+</div>
+<div id="illustration-2-growth-curve-power-analysis" class="section level2">
+<h2>Illustration 2: Growth Curve Power Analysis</h2>
+<p>The second illustration demonstrates a power analysis for a
+longitudinal growth curve model with a pair of cross-level interactions
+involving a binary level-2 moderator. Intraclass correlations for
+longitudinal and intensive repeated measures data often reach values of
+.40 or higher (Arend &amp; Schäfer, 2019; Bolger &amp; Laurenceau, 2013;
+Singer &amp; Willett, 2003). To accommodate uncertainty about this
+important parameter, the simulation investigates intraclass correlation
+values of .40 and .60.</p>
+<p>The multilevel model for the illustration is</p>
+<p><span class="math display">\[
+\begin{split}
+Y_{ij} &amp;= \left( \beta_{0} + b_{0j} \right) + \left( \beta_{1} +
+b_{1j} \right)X_{1ij}^{w} + \beta_{2}\left( X_{2ij}^{w} + X_{2j}^{b}
+\right) + \beta_{3}\left( X_{3ij}^{w} + X_{3j}^{b} \right)\\
+&amp;\phantom{=}+ \ \beta_{4}Z_{1j}^{b} + \ \beta_{5}Z_{2j}^{b} +
+\beta_{6}Z_{3j}^{b} + \beta_{7}X_{1ij}^{w}Z_{1j}^{b} + \varepsilon_{ij}
+\\
+\mathbf{b}_{j}\ &amp;\sim\ N\left( 0,\mathbf{\Sigma}_{\mathbf{b}}
+\right)\ \ \ \ \ \mathbf{\Sigma}_{\mathbf{b}}=\begin{pmatrix}
+\sigma_{b_{0}}^{2} &amp; \\
+\sigma_{b_{1},b_{0}} &amp; \sigma_{b_{1}}^{2} \\
+\end{pmatrix}\mathbf{\ \ \ \ \ }\varepsilon_{ij}\ \sim\
+N(0,\sigma_{\varepsilon}^{2})
+\end{split}
+\]</span></p>
+<p>Following established notation (see Illustration 1), the <em>w</em>
+and <em>b</em> superscripts reference within- and between-cluster
+deviation scores, respectively. The explanatory variables include a time
+score predictor with a random coefficient, a pair of time-varying
+covariates, a binary level-2 moderator, a pair of level-2 covariates,
+and a cross-level (group-by-time) interaction. For the purposes of
+weighting, we designated <span class="math inline">\(X_{1}\)</span> and
+<span class="math inline">\(Z_{1}\)</span> (the interacting variables)
+as focal predictors, <span class="math inline">\(X_{2}\)</span> and
+<span class="math inline">\(X_{3}\)</span> as level-1 (time-varying)
+covariates, and <span class="math inline">\(Z_{2}\)</span> and <span class="math inline">\(Z_{3}\)</span> as level-2 covariates. To mimic the
+scaling of a typical temporal index, we assume the major time increments
+are coded <span class="math inline">\(X_{1}^{w}\)</span> = (0, 1, 2, 3,
+4).</p>
+<p>A brief discussion of <span class="math inline">\(Z_{1}\)</span> (the
+binary moderator) is warranted before continuing. First, like other
+level-2 variables, this variable’s population mean must be 0 (i.e.,
+<span class="math inline">\(Z_{1}\)</span> is centered in the
+population) in order to maintain the orthogonality of the cross-level
+interaction terms. Grand mean centering a level-2 binary predictor
+creates an ANOVA-like contrast code, such that <span class="math inline">\(\beta_{0}\)</span> is the grand mean and <span class="math inline">\(\beta_{4}\)</span> is the predicted group mean
+difference when <span class="math inline">\(X_{1}^{w}\)</span> (the time
+score predictor) equals 0. In this case, a code of 0 corresponds to the
+baseline assessment. Because <span class="math inline">\(\beta_{4}\)</span> is a conditional effect that
+represents the group mean difference at the first occasion, <span class="math inline">\(Z_{1}\)</span>’s contribution to the
+between-cluster effect size depends on whether we view this regressor as
+a naturally occurring classification or an intervention assignment
+indicator. In the former case, we might expect a group mean difference
+at baseline, and the presence of such a difference would require a
+non-zero weight. In contrast, random assignment to conditions would
+eliminate a group mean difference at baseline, and <span class="math inline">\(Z_{1}\)</span>’s weight would equal 0. Note that
+this conclusion changes if the time scores are coded differently. For
+illustration purposes, we assume <span class="math inline">\(Z_{1}\)</span> is an intervention assignment
+indicator.</p>
+<p>The key inputs to the model object are the unconditional intraclass
+correlation and effect size values. This illustration investigates power
+for intraclass correlation values of .40 and .60. The within- and
+between-cluster fixed effects are set to <span class="math inline">\(R_{w}^{2}\)</span> = .13 and <span class="math inline">\(R_{b}^{2}\)</span> = .065, respectively; the
+former corresponds to Cohen’s (1988) medium effect size benchmark. Note
+that <span class="math inline">\(R_{b}^{2}\)</span> cannot exceed the
+outcome’s intraclass correlation, as this would imply that
+between-cluster predictors explain more than 100% of the available
+variance. Following conventional wisdom that interaction effects tend to
+produce small effects (Aguinis et al., 2005; Chaplin, 1991), <span class="math inline">\(R_{p}^{2}\)</span> = .05 is assigned to the pair
+of cross-level product terms. Finally, the random coefficient effect
+size is set to <span class="math inline">\(R_{rc}^{2}\)</span> = .03
+based on values from Table 2 in Enders et al. (2023).</p>
+<p>To refresh, we designated <span class="math inline">\(X_{1}\)</span>
+and <span class="math inline">\(Z_{1}\)</span> (the interacting
+variables) as focal predictors, <span class="math inline">\(X_{2}\)</span> and <span class="math inline">\(X_{3}\)</span> as level-1 (time-varying)
+covariates, and <span class="math inline">\(Z_{2}\)</span> and <span class="math inline">\(Z_{3}\)</span> as level-2 covariates. To mimic a
+situation where the linear change predominates the level-1 model, we
+used weights of .50, .25, .25 to allocate the within-cluster <span class="math inline">\(R^{2}\)</span> to <span class="math inline">\(X_{1}\)</span>, <span class="math inline">\(X_{2}\)</span>, and <span class="math inline">\(X_{3}\)</span>. At level-2, we used weights equal
+to 0, .50, .50 to allocate the between-cluster <span class="math inline">\(R^{2}\)</span> to <span class="math inline">\(Z_{1}\)</span>, <span class="math inline">\(Z_{2}\)</span>, and <span class="math inline">\(Z_{3}\)</span>. As noted previously, <span class="math inline">\(Z_{1}\)</span>’s slope represents the group mean
+difference at baseline, and we are assuming that random assignment
+nullifies this effect. Finally, <span class="math inline">\(R_{p}^{2}\)</span> and <span class="math inline">\(R_{rc}^{2}\)</span> do not require weights because
+a single variable determines each source of variation.</p>
+<p>To illustrate how to modify default correlation settings, we sampled
+within-cluster predictor correlations between the range of .20 and .40
+under the assumption that the time scores could have stronger
+associations with other time-varying predictors. We similarly sampled
+the random effect correlations between the range of .30 and .50 to mimic
+a scenario where higher baseline scores (i.e., random intercepts) are
+associated with higher (more positive) growth rates. Finally, we adopted
+the default correlation range for the between-cluster predictors. The
+simulations from the previous cross-sectional example suggest that the
+correlations are somewhat arbitrary and would not have a material impact
+on power estimates.</p>
+<p>The following code block shows the <code>mlmpower</code> model object
+for this example.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>example2 <span class="ot">&lt;-</span> (</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>    <span class="fu">effect_size</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>        <span class="at">icc          =</span> <span class="fu">c</span>(.<span class="dv">40</span>, .<span class="dv">60</span>),</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>        <span class="at">within       =</span> .<span class="dv">13</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>        <span class="at">between      =</span> .<span class="dv">065</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>        <span class="at">product      =</span> .<span class="dv">03</span>,</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>        <span class="at">random_slope =</span> .<span class="dv">10</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>    )</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">outcome</span>(<span class="st">&#39;y&#39;</span>, <span class="at">mean =</span> <span class="dv">50</span>, <span class="at">sd =</span> <span class="dv">10</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">within_time_predictor</span>(<span class="st">&#39;x1&#39;</span>, <span class="at">weight =</span> .<span class="dv">50</span>, <span class="at">values =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">4</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">within_predictor</span>(<span class="st">&#39;x2&#39;</span>, <span class="at">weight =</span> .<span class="dv">25</span>)</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">within_predictor</span>(<span class="st">&#39;x3&#39;</span>, <span class="at">weight =</span> .<span class="dv">25</span>)</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">between_binary_predictor</span>(<span class="st">&#39;z1&#39;</span>, <span class="at">proportion =</span> .<span class="dv">50</span>, <span class="at">weight =</span> <span class="dv">0</span>)</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">between_predictor</span>(<span class="st">&#39;z2&#39;</span>, <span class="at">weight =</span> .<span class="dv">50</span>)</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">between_predictor</span>(<span class="st">&#39;z3&#39;</span>, <span class="at">weight =</span> .<span class="dv">50</span>)</span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">product</span>(<span class="st">&#39;x1&#39;</span>,<span class="st">&#39;z1&#39;</span>, <span class="at">weight =</span> <span class="dv">1</span>)</span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">random_slope</span>(<span class="st">&#39;x1&#39;</span>, <span class="at">weight =</span> <span class="dv">1</span>)</span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">correlations</span>(</span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a>        <span class="at">within  =</span> <span class="fu">random</span>(.<span class="dv">20</span>, .<span class="dv">40</span>),</span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>        <span class="at">between =</span> <span class="fu">random</span>(.<span class="dv">10</span>, .<span class="dv">30</span>),</span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a>        <span class="at">randeff =</span> <span class="fu">random</span>(.<span class="dv">30</span>, .<span class="dv">50</span>)</span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a>    )</span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a>)</span></code></pre></div>
+<p>The <code>mlmpower</code> package groups <span class="math inline">\(R^{2}\)</span> values and intraclass correlations
+into a single object called <code>effect_size()</code>, with the five
+inputs separated by commas. The within argument corresponds to <span class="math inline">\(R_{w}^{2}\)</span>, the between argument aligns
+with <span class="math inline">\(R_{b}^{2}\)</span>, the product
+argument specifies <span class="math inline">\(R_{p}^{2}\)</span>, and
+the random_slope argument corresponds to <span class="math inline">\(R_{rc}^{2}\)</span>. The icc argument assigns a
+global intraclass correlation to all level-1 variables, and separate
+simulations are performed for each requested level.</p>
+<p>Variable attributes are referenced by adding the following base
+objects: <code>outcome()</code>, <code>within_predictor()</code>,
+<code>between_predictor()</code>, <code>product()</code>, and
+<code>random_slope()</code>. All five objects have an argument for the
+variable name, weight (<code>weight =</code>), mean
+(<code>mean =</code>), and standard deviation (<code>sd =</code>).
+Level-1 variables additionally have an intraclass correlation argument
+(<code>icc =</code>) that supersedes the global setting in
+<code>effect_size()</code>.</p>
+<p>This illustration additionally uses the
+<code>within_time_predictor()</code> object to specify a set of fixed
+time scores for <span class="math inline">\(X_{1}\)</span>, and it uses
+<code>between_binary_predictor()</code> object to define the level-2
+moderator <span class="math inline">\(Z_{1}\)</span> as a binary
+predictor. In addition to a name and weight, the
+<code>within_time_predictor()</code> object requires a vector of time
+scores as an argument (<code>values =</code>). The
+<code>between_binary_predictor()</code> object requires a name, weight,
+and the highest category proportion (<code>proportion =</code>).</p>
+<p>First, the <code>within_time_predictor()</code> object specifies
+<span class="math inline">\(X_{1}\)</span> as a temporal predictor with
+the fixed set of time scores described earlier. The
+<code>values = 0:4</code> argument specifies an integer sequence, but
+unequally spaced increments can also be specified using a vector as
+input (e.g., <code>values = c(0,1,3,6)</code>). This object does not
+require a mean or standard deviation argument, as these quantities are
+determined from the time scores. Additionally, the variable’s intraclass
+correlation is automatically fixed to 0 because the time scores are
+constant across level-2 units. Next the
+<code>between_binary_predictor(&#39;z1&#39;, proportion = .50, weight = 0)</code>
+object specifies <span class="math inline">\(Z_{1}\)</span> (the
+moderator variable) as a binary predictor with a 50/50 split. This
+object does not require a mean or standard deviation argument, as the
+category proportions determine these quantities. Finally, within the
+exception of the outcome, the code block uses default values for all
+means and standard deviations (0 and 1, respectively). The means and
+standard deviations of the time scores and binary predictor are
+automatically determined by the user inputs.</p>
+<p>The multilevel model parameters also require three sets of
+correlations: within-cluster correlations among level-1 predictors,
+between-cluster correlations among level-2 predictors, and random effect
+correlations. These correlations are optional, but they can specified
+using the <code>correlations()</code> object. This example samples
+within-cluster predictor correlation values between .20 and .40 (e.g.,
+to mimic a situation where the time scores have salient correlations
+with other repeated measures predictors). Random effect correlation
+values are similarly sampled between the range of .30 and .50 to mimic a
+scenario where higher baseline scores (i.e., random intercepts) are
+associated with higher (more positive) growth rates. Finally, the script
+specifies the default setting for between-cluster correlations, which is
+to iteratively sample correlation values between .10 and .30.</p>
+<p>It may be instructive to inspect the population parameters prior to
+running the simulation. Executing <code>summary(example2)</code> returns
+tabular summaries of the multilevel model parameters.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">summary</span>(example2)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co">#&gt; ! Parameters are solved based on average correlation.</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; $`icc = 0.4`</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; $r2</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt;                                          Proportion</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt; Variance Within-Cluster Fixed Effects    0.13000000</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt; Variance Cross-Level Interaction Effects 0.03000000</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; Variance Random Slopes                   0.10000000</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; Within-Cluster Error Variance            0.34000000</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt; Variance Between-Cluster Fixed Effects   0.12474120</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt; Incremental Variance Level-2 Predictors  0.06500000</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; Between Variance Level-1 Covariates      0.05974120</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; Variance Random Intercepts               0.03964212</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt; $phi_b</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt;                 x2_b       x3_b  z1_binary         z2         z3</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#&gt; x2_b      0.40000000 0.12000000 0.06324555 0.12649111 0.12649111</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#&gt; x3_b      0.12000000 0.40000000 0.06324555 0.12649111 0.12649111</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt; z1_binary 0.06324555 0.06324555 0.25000000 0.07978846 0.07978846</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="co">#&gt; z2        0.12649111 0.12649111 0.07978846 1.00000000 0.20000000</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="co">#&gt; z3        0.12649111 0.12649111 0.07978846 0.20000000 1.00000000</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="co">#&gt; $phi_p</span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="co">#&gt;                x1_w*z1_binary</span></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="co">#&gt; x1_w*z1_binary            0.5</span></span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="co">#&gt; $phi_w</span></span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="co">#&gt;           x1_w      x2_w      x3_w</span></span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="co">#&gt; x1_w 2.0000000 0.3286335 0.3286335</span></span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a><span class="co">#&gt; x2_w 0.3286335 0.6000000 0.1800000</span></span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a><span class="co">#&gt; x3_w 0.3286335 0.1800000 0.6000000</span></span>
+<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a><span class="co">#&gt; $mean_Z</span></span>
+<span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a><span class="co">#&gt;  z1  z2  z3 </span></span>
+<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a><span class="co">#&gt; 0.5 0.0 0.0 </span></span>
+<span id="cb7-36"><a href="#cb7-36" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-37"><a href="#cb7-37" tabindex="-1"></a><span class="co">#&gt; $mean_X</span></span>
+<span id="cb7-38"><a href="#cb7-38" tabindex="-1"></a><span class="co">#&gt; x1 x2 x3 </span></span>
+<span id="cb7-39"><a href="#cb7-39" tabindex="-1"></a><span class="co">#&gt;  2  0  0 </span></span>
+<span id="cb7-40"><a href="#cb7-40" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-41"><a href="#cb7-41" tabindex="-1"></a><span class="co">#&gt; $var_e</span></span>
+<span id="cb7-42"><a href="#cb7-42" tabindex="-1"></a><span class="co">#&gt;           Value</span></span>
+<span id="cb7-43"><a href="#cb7-43" tabindex="-1"></a><span class="co">#&gt; Res. Var.    34</span></span>
+<span id="cb7-44"><a href="#cb7-44" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-45"><a href="#cb7-45" tabindex="-1"></a><span class="co">#&gt; $tau</span></span>
+<span id="cb7-46"><a href="#cb7-46" tabindex="-1"></a><span class="co">#&gt;          Icept     x1_w</span></span>
+<span id="cb7-47"><a href="#cb7-47" tabindex="-1"></a><span class="co">#&gt; Icept 3.964212 1.780834</span></span>
+<span id="cb7-48"><a href="#cb7-48" tabindex="-1"></a><span class="co">#&gt; x1_w  1.780834 5.000000</span></span>
+<span id="cb7-49"><a href="#cb7-49" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-50"><a href="#cb7-50" tabindex="-1"></a><span class="co">#&gt; $gammas</span></span>
+<span id="cb7-51"><a href="#cb7-51" tabindex="-1"></a><span class="co">#&gt;                    Value</span></span>
+<span id="cb7-52"><a href="#cb7-52" tabindex="-1"></a><span class="co">#&gt; Icept          46.600654</span></span>
+<span id="cb7-53"><a href="#cb7-53" tabindex="-1"></a><span class="co">#&gt; x1_w            1.699673</span></span>
+<span id="cb7-54"><a href="#cb7-54" tabindex="-1"></a><span class="co">#&gt; x2_w            1.551582</span></span>
+<span id="cb7-55"><a href="#cb7-55" tabindex="-1"></a><span class="co">#&gt; x3_w            1.551582</span></span>
+<span id="cb7-56"><a href="#cb7-56" tabindex="-1"></a><span class="co">#&gt; x1_w*z1_binary  2.449490</span></span>
+<span id="cb7-57"><a href="#cb7-57" tabindex="-1"></a><span class="co">#&gt; x2_b            1.551582</span></span>
+<span id="cb7-58"><a href="#cb7-58" tabindex="-1"></a><span class="co">#&gt; x3_b            1.551582</span></span>
+<span id="cb7-59"><a href="#cb7-59" tabindex="-1"></a><span class="co">#&gt; z2              1.737198</span></span>
+<span id="cb7-60"><a href="#cb7-60" tabindex="-1"></a><span class="co">#&gt; z3              1.737198</span></span>
+<span id="cb7-61"><a href="#cb7-61" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-62"><a href="#cb7-62" tabindex="-1"></a><span class="co">#&gt; $mean_Y</span></span>
+<span id="cb7-63"><a href="#cb7-63" tabindex="-1"></a><span class="co">#&gt;  y </span></span>
+<span id="cb7-64"><a href="#cb7-64" tabindex="-1"></a><span class="co">#&gt; 50 </span></span>
+<span id="cb7-65"><a href="#cb7-65" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-66"><a href="#cb7-66" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-67"><a href="#cb7-67" tabindex="-1"></a><span class="co">#&gt; $`icc = 0.6`</span></span>
+<span id="cb7-68"><a href="#cb7-68" tabindex="-1"></a><span class="co">#&gt; $r2</span></span>
+<span id="cb7-69"><a href="#cb7-69" tabindex="-1"></a><span class="co">#&gt;                                          Proportion</span></span>
+<span id="cb7-70"><a href="#cb7-70" tabindex="-1"></a><span class="co">#&gt; Variance Within-Cluster Fixed Effects     0.1300000</span></span>
+<span id="cb7-71"><a href="#cb7-71" tabindex="-1"></a><span class="co">#&gt; Variance Cross-Level Interaction Effects  0.0300000</span></span>
+<span id="cb7-72"><a href="#cb7-72" tabindex="-1"></a><span class="co">#&gt; Variance Random Slopes                    0.1000000</span></span>
+<span id="cb7-73"><a href="#cb7-73" tabindex="-1"></a><span class="co">#&gt; Within-Cluster Error Variance             0.1400000</span></span>
+<span id="cb7-74"><a href="#cb7-74" tabindex="-1"></a><span class="co">#&gt; Variance Between-Cluster Fixed Effects    0.1696753</span></span>
+<span id="cb7-75"><a href="#cb7-75" tabindex="-1"></a><span class="co">#&gt; Incremental Variance Level-2 Predictors   0.0650000</span></span>
+<span id="cb7-76"><a href="#cb7-76" tabindex="-1"></a><span class="co">#&gt; Between Variance Level-1 Covariates       0.1046753</span></span>
+<span id="cb7-77"><a href="#cb7-77" tabindex="-1"></a><span class="co">#&gt; Variance Random Intercepts                0.1589955</span></span>
+<span id="cb7-78"><a href="#cb7-78" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-79"><a href="#cb7-79" tabindex="-1"></a><span class="co">#&gt; $phi_b</span></span>
+<span id="cb7-80"><a href="#cb7-80" tabindex="-1"></a><span class="co">#&gt;                 x2_b       x3_b  z1_binary         z2         z3</span></span>
+<span id="cb7-81"><a href="#cb7-81" tabindex="-1"></a><span class="co">#&gt; x2_b      0.60000000 0.18000000 0.07745967 0.15491933 0.15491933</span></span>
+<span id="cb7-82"><a href="#cb7-82" tabindex="-1"></a><span class="co">#&gt; x3_b      0.18000000 0.60000000 0.07745967 0.15491933 0.15491933</span></span>
+<span id="cb7-83"><a href="#cb7-83" tabindex="-1"></a><span class="co">#&gt; z1_binary 0.07745967 0.07745967 0.25000000 0.07978846 0.07978846</span></span>
+<span id="cb7-84"><a href="#cb7-84" tabindex="-1"></a><span class="co">#&gt; z2        0.15491933 0.15491933 0.07978846 1.00000000 0.20000000</span></span>
+<span id="cb7-85"><a href="#cb7-85" tabindex="-1"></a><span class="co">#&gt; z3        0.15491933 0.15491933 0.07978846 0.20000000 1.00000000</span></span>
+<span id="cb7-86"><a href="#cb7-86" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-87"><a href="#cb7-87" tabindex="-1"></a><span class="co">#&gt; $phi_p</span></span>
+<span id="cb7-88"><a href="#cb7-88" tabindex="-1"></a><span class="co">#&gt;                x1_w*z1_binary</span></span>
+<span id="cb7-89"><a href="#cb7-89" tabindex="-1"></a><span class="co">#&gt; x1_w*z1_binary            0.5</span></span>
+<span id="cb7-90"><a href="#cb7-90" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-91"><a href="#cb7-91" tabindex="-1"></a><span class="co">#&gt; $phi_w</span></span>
+<span id="cb7-92"><a href="#cb7-92" tabindex="-1"></a><span class="co">#&gt;           x1_w      x2_w      x3_w</span></span>
+<span id="cb7-93"><a href="#cb7-93" tabindex="-1"></a><span class="co">#&gt; x1_w 2.0000000 0.2683282 0.2683282</span></span>
+<span id="cb7-94"><a href="#cb7-94" tabindex="-1"></a><span class="co">#&gt; x2_w 0.2683282 0.4000000 0.1200000</span></span>
+<span id="cb7-95"><a href="#cb7-95" tabindex="-1"></a><span class="co">#&gt; x3_w 0.2683282 0.1200000 0.4000000</span></span>
+<span id="cb7-96"><a href="#cb7-96" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-97"><a href="#cb7-97" tabindex="-1"></a><span class="co">#&gt; $mean_Z</span></span>
+<span id="cb7-98"><a href="#cb7-98" tabindex="-1"></a><span class="co">#&gt;  z1  z2  z3 </span></span>
+<span id="cb7-99"><a href="#cb7-99" tabindex="-1"></a><span class="co">#&gt; 0.5 0.0 0.0 </span></span>
+<span id="cb7-100"><a href="#cb7-100" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-101"><a href="#cb7-101" tabindex="-1"></a><span class="co">#&gt; $mean_X</span></span>
+<span id="cb7-102"><a href="#cb7-102" tabindex="-1"></a><span class="co">#&gt; x1 x2 x3 </span></span>
+<span id="cb7-103"><a href="#cb7-103" tabindex="-1"></a><span class="co">#&gt;  2  0  0 </span></span>
+<span id="cb7-104"><a href="#cb7-104" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-105"><a href="#cb7-105" tabindex="-1"></a><span class="co">#&gt; $var_e</span></span>
+<span id="cb7-106"><a href="#cb7-106" tabindex="-1"></a><span class="co">#&gt;           Value</span></span>
+<span id="cb7-107"><a href="#cb7-107" tabindex="-1"></a><span class="co">#&gt; Res. Var.    14</span></span>
+<span id="cb7-108"><a href="#cb7-108" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-109"><a href="#cb7-109" tabindex="-1"></a><span class="co">#&gt; $tau</span></span>
+<span id="cb7-110"><a href="#cb7-110" tabindex="-1"></a><span class="co">#&gt;          Icept    x1_w</span></span>
+<span id="cb7-111"><a href="#cb7-111" tabindex="-1"></a><span class="co">#&gt; Icept 15.89955 3.56646</span></span>
+<span id="cb7-112"><a href="#cb7-112" tabindex="-1"></a><span class="co">#&gt; x1_w   3.56646 5.00000</span></span>
+<span id="cb7-113"><a href="#cb7-113" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-114"><a href="#cb7-114" tabindex="-1"></a><span class="co">#&gt; $gammas</span></span>
+<span id="cb7-115"><a href="#cb7-115" tabindex="-1"></a><span class="co">#&gt;                    Value</span></span>
+<span id="cb7-116"><a href="#cb7-116" tabindex="-1"></a><span class="co">#&gt; Icept          46.600654</span></span>
+<span id="cb7-117"><a href="#cb7-117" tabindex="-1"></a><span class="co">#&gt; x1_w            1.699673</span></span>
+<span id="cb7-118"><a href="#cb7-118" tabindex="-1"></a><span class="co">#&gt; x2_w            1.900292</span></span>
+<span id="cb7-119"><a href="#cb7-119" tabindex="-1"></a><span class="co">#&gt; x3_w            1.900292</span></span>
+<span id="cb7-120"><a href="#cb7-120" tabindex="-1"></a><span class="co">#&gt; x1_w*z1_binary  2.449490</span></span>
+<span id="cb7-121"><a href="#cb7-121" tabindex="-1"></a><span class="co">#&gt; x2_b            1.900292</span></span>
+<span id="cb7-122"><a href="#cb7-122" tabindex="-1"></a><span class="co">#&gt; x3_b            1.900292</span></span>
+<span id="cb7-123"><a href="#cb7-123" tabindex="-1"></a><span class="co">#&gt; z2              1.737198</span></span>
+<span id="cb7-124"><a href="#cb7-124" tabindex="-1"></a><span class="co">#&gt; z3              1.737198</span></span>
+<span id="cb7-125"><a href="#cb7-125" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb7-126"><a href="#cb7-126" tabindex="-1"></a><span class="co">#&gt; $mean_Y</span></span>
+<span id="cb7-127"><a href="#cb7-127" tabindex="-1"></a><span class="co">#&gt;  y </span></span>
+<span id="cb7-128"><a href="#cb7-128" tabindex="-1"></a><span class="co">#&gt; 50</span></span></code></pre></div>
+<p>Having specified the target model, you next use the
+<code>power_analysis()</code> function to conduct simulations. The
+function requires four inputs: the model argument specifies the
+parameter value object (e.g., <code>example2</code>), the
+<code>replications</code> input specifies the number of artificial data
+sets, <code>n_between</code> is a vector of level-2 sample sizes, and
+<code>n_within</code> is a vector of level-1 sample sizes (i.e., the
+number of observations per cluster). The code block below specifies six
+level-2 sample size conditions (<span class="math inline">\(J =\)</span>
+50, 60, 70, 80, 90, and 100), each with five repeated measurements and
+2,000 replications.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Set seed for replicable results</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12379</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co"># Run Power Analysis</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>powersim2 <span class="ot">&lt;-</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>    <span class="fu">power_analysis</span>(</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>        <span class="at">model =</span> example2,</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>        <span class="at">replications =</span> <span class="dv">2000</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>        <span class="at">n_between =</span> <span class="fu">c</span>(<span class="dv">50</span>, <span class="dv">60</span>, <span class="dv">70</span>, <span class="dv">80</span>, <span class="dv">90</span>, <span class="dv">100</span>),</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>        <span class="at">n_within =</span> <span class="dv">5</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>    )</span></code></pre></div>
+<p>The package uses <code>lme4</code> (Bates et al., 2021) for model
+fitting, and it defaults to an alpha level of .05 for all significance
+tests. Significance tests of random slope variation use a likelihood
+ratio test with a mixture chi-square reference distribution (i.e., a
+chi-bar distribution; Snijders &amp; Bosker, 2012, p. 99), as
+implemented in the <code>varTestnlme</code> package (Baey &amp; Kuhn,
+2022). Executing <code>summary(powersim2)</code> returns the tabular
+summaries of the simulation results shown below.</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">summary</span>(powersim2)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt; ── Power Analysis Specification ──</span></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt; Replications = 2000</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; N_Within = 5</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#&gt; N_Between = 50, 60, 70, 80, 90, and 100</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a><span class="co">#&gt; ── lme4 Model Syntax</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a><span class="co">#&gt; y ~ 1 + x1 + cgm(x2) + cgm(x3) + x1:cgm(z1) + cgm(z1) + cgm(z2) + cgm(z3) + (1</span></span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a><span class="co">#&gt; + x1 | `_id`)</span></span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a><span class="co">#&gt; ℹ cwc() = centering within cluster</span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a><span class="co">#&gt; ℹ cgm() = centering with grand mean</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; ── Effect Sizes</span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt; • WITHIN = 0.13</span></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co">#&gt; • BETWEEN = 0.065</span></span>
+<span id="cb9-21"><a href="#cb9-21" tabindex="-1"></a><span class="co">#&gt; • RANDOM SLOPE = 0.1</span></span>
+<span id="cb9-22"><a href="#cb9-22" tabindex="-1"></a><span class="co">#&gt; • PRODUCT = 0.03</span></span>
+<span id="cb9-23"><a href="#cb9-23" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-24"><a href="#cb9-24" tabindex="-1"></a><span class="co">#&gt; ── Power Analysis Results ──</span></span>
+<span id="cb9-25"><a href="#cb9-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-26"><a href="#cb9-26" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.4, n_within = 5, n_between = 50</span></span>
+<span id="cb9-27"><a href="#cb9-27" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb9-28"><a href="#cb9-28" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb9-29"><a href="#cb9-29" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1          0.96 ± 0.01</span></span>
+<span id="cb9-30"><a href="#cb9-30" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.85 ± 0.02</span></span>
+<span id="cb9-31"><a href="#cb9-31" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.84 ± 0.02</span></span>
+<span id="cb9-32"><a href="#cb9-32" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     0.05 ± 0.01</span></span>
+<span id="cb9-33"><a href="#cb9-33" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)     0.68 ± 0.02</span></span>
+<span id="cb9-34"><a href="#cb9-34" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z3)     0.69 ± 0.02</span></span>
+<span id="cb9-35"><a href="#cb9-35" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1:cgm(z1)  0.81 ± 0.02</span></span>
+<span id="cb9-36"><a href="#cb9-36" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test 1.00 ± 0.00</span></span>
+<span id="cb9-37"><a href="#cb9-37" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-38"><a href="#cb9-38" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.6, n_within = 5, n_between = 50</span></span>
+<span id="cb9-39"><a href="#cb9-39" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb9-40"><a href="#cb9-40" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb9-41"><a href="#cb9-41" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1          0.99 ± 0.00</span></span>
+<span id="cb9-42"><a href="#cb9-42" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.99 ± 0.00</span></span>
+<span id="cb9-43"><a href="#cb9-43" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.99 ± 0.00</span></span>
+<span id="cb9-44"><a href="#cb9-44" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     0.05 ± 0.01</span></span>
+<span id="cb9-45"><a href="#cb9-45" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)     0.62 ± 0.02</span></span>
+<span id="cb9-46"><a href="#cb9-46" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z3)     0.61 ± 0.02</span></span>
+<span id="cb9-47"><a href="#cb9-47" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1:cgm(z1)  0.92 ± 0.01</span></span>
+<span id="cb9-48"><a href="#cb9-48" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test 1.00 ± 0.00</span></span>
+<span id="cb9-49"><a href="#cb9-49" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-50"><a href="#cb9-50" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.4, n_within = 5, n_between = 60</span></span>
+<span id="cb9-51"><a href="#cb9-51" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb9-52"><a href="#cb9-52" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb9-53"><a href="#cb9-53" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1          0.99 ± 0.00</span></span>
+<span id="cb9-54"><a href="#cb9-54" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.90 ± 0.01</span></span>
+<span id="cb9-55"><a href="#cb9-55" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.90 ± 0.01</span></span>
+<span id="cb9-56"><a href="#cb9-56" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     0.05 ± 0.01</span></span>
+<span id="cb9-57"><a href="#cb9-57" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)     0.76 ± 0.02</span></span>
+<span id="cb9-58"><a href="#cb9-58" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z3)     0.76 ± 0.02</span></span>
+<span id="cb9-59"><a href="#cb9-59" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1:cgm(z1)  0.89 ± 0.01</span></span>
+<span id="cb9-60"><a href="#cb9-60" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test 1.00 ± 0.00</span></span>
+<span id="cb9-61"><a href="#cb9-61" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-62"><a href="#cb9-62" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.6, n_within = 5, n_between = 60</span></span>
+<span id="cb9-63"><a href="#cb9-63" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb9-64"><a href="#cb9-64" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb9-65"><a href="#cb9-65" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1          1.00 ± 0.00</span></span>
+<span id="cb9-66"><a href="#cb9-66" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     1.00 ± 0.00</span></span>
+<span id="cb9-67"><a href="#cb9-67" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     1.00 ± 0.00</span></span>
+<span id="cb9-68"><a href="#cb9-68" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     0.06 ± 0.01</span></span>
+<span id="cb9-69"><a href="#cb9-69" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)     0.72 ± 0.02</span></span>
+<span id="cb9-70"><a href="#cb9-70" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z3)     0.71 ± 0.02</span></span>
+<span id="cb9-71"><a href="#cb9-71" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1:cgm(z1)  0.96 ± 0.01</span></span>
+<span id="cb9-72"><a href="#cb9-72" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test 1.00 ± 0.00</span></span>
+<span id="cb9-73"><a href="#cb9-73" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-74"><a href="#cb9-74" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.4, n_within = 5, n_between = 70</span></span>
+<span id="cb9-75"><a href="#cb9-75" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb9-76"><a href="#cb9-76" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb9-77"><a href="#cb9-77" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1          0.99 ± 0.00</span></span>
+<span id="cb9-78"><a href="#cb9-78" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.94 ± 0.01</span></span>
+<span id="cb9-79"><a href="#cb9-79" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.94 ± 0.01</span></span>
+<span id="cb9-80"><a href="#cb9-80" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     0.05 ± 0.01</span></span>
+<span id="cb9-81"><a href="#cb9-81" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)     0.83 ± 0.02</span></span>
+<span id="cb9-82"><a href="#cb9-82" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z3)     0.83 ± 0.02</span></span>
+<span id="cb9-83"><a href="#cb9-83" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1:cgm(z1)  0.94 ± 0.01</span></span>
+<span id="cb9-84"><a href="#cb9-84" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test 1.00 ± 0.00</span></span>
+<span id="cb9-85"><a href="#cb9-85" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-86"><a href="#cb9-86" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.6, n_within = 5, n_between = 70</span></span>
+<span id="cb9-87"><a href="#cb9-87" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb9-88"><a href="#cb9-88" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb9-89"><a href="#cb9-89" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1          1.00 ± 0.00</span></span>
+<span id="cb9-90"><a href="#cb9-90" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     1.00 ± 0.00</span></span>
+<span id="cb9-91"><a href="#cb9-91" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     1.00 ± 0.00</span></span>
+<span id="cb9-92"><a href="#cb9-92" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     0.05 ± 0.01</span></span>
+<span id="cb9-93"><a href="#cb9-93" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)     0.78 ± 0.02</span></span>
+<span id="cb9-94"><a href="#cb9-94" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z3)     0.78 ± 0.02</span></span>
+<span id="cb9-95"><a href="#cb9-95" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1:cgm(z1)  0.98 ± 0.01</span></span>
+<span id="cb9-96"><a href="#cb9-96" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test 1.00 ± 0.00</span></span>
+<span id="cb9-97"><a href="#cb9-97" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-98"><a href="#cb9-98" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.4, n_within = 5, n_between = 80</span></span>
+<span id="cb9-99"><a href="#cb9-99" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb9-100"><a href="#cb9-100" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb9-101"><a href="#cb9-101" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1          1.00 ± 0.00</span></span>
+<span id="cb9-102"><a href="#cb9-102" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.96 ± 0.01</span></span>
+<span id="cb9-103"><a href="#cb9-103" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.96 ± 0.01</span></span>
+<span id="cb9-104"><a href="#cb9-104" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     0.05 ± 0.01</span></span>
+<span id="cb9-105"><a href="#cb9-105" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)     0.88 ± 0.01</span></span>
+<span id="cb9-106"><a href="#cb9-106" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z3)     0.87 ± 0.01</span></span>
+<span id="cb9-107"><a href="#cb9-107" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1:cgm(z1)  0.95 ± 0.01</span></span>
+<span id="cb9-108"><a href="#cb9-108" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test 1.00 ± 0.00</span></span>
+<span id="cb9-109"><a href="#cb9-109" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-110"><a href="#cb9-110" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.6, n_within = 5, n_between = 80</span></span>
+<span id="cb9-111"><a href="#cb9-111" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb9-112"><a href="#cb9-112" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb9-113"><a href="#cb9-113" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1          1.00 ± 0.00</span></span>
+<span id="cb9-114"><a href="#cb9-114" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     1.00 ± 0.00</span></span>
+<span id="cb9-115"><a href="#cb9-115" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     1.00 ± 0.00</span></span>
+<span id="cb9-116"><a href="#cb9-116" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     0.06 ± 0.01</span></span>
+<span id="cb9-117"><a href="#cb9-117" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)     0.83 ± 0.02</span></span>
+<span id="cb9-118"><a href="#cb9-118" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z3)     0.84 ± 0.02</span></span>
+<span id="cb9-119"><a href="#cb9-119" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1:cgm(z1)  0.99 ± 0.00</span></span>
+<span id="cb9-120"><a href="#cb9-120" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test 1.00 ± 0.00</span></span>
+<span id="cb9-121"><a href="#cb9-121" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-122"><a href="#cb9-122" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.4, n_within = 5, n_between = 90</span></span>
+<span id="cb9-123"><a href="#cb9-123" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb9-124"><a href="#cb9-124" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb9-125"><a href="#cb9-125" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1          1.00 ± 0.00</span></span>
+<span id="cb9-126"><a href="#cb9-126" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.98 ± 0.01</span></span>
+<span id="cb9-127"><a href="#cb9-127" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.98 ± 0.01</span></span>
+<span id="cb9-128"><a href="#cb9-128" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     0.06 ± 0.01</span></span>
+<span id="cb9-129"><a href="#cb9-129" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)     0.91 ± 0.01</span></span>
+<span id="cb9-130"><a href="#cb9-130" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z3)     0.91 ± 0.01</span></span>
+<span id="cb9-131"><a href="#cb9-131" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1:cgm(z1)  0.97 ± 0.01</span></span>
+<span id="cb9-132"><a href="#cb9-132" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test 1.00 ± 0.00</span></span>
+<span id="cb9-133"><a href="#cb9-133" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-134"><a href="#cb9-134" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.6, n_within = 5, n_between = 90</span></span>
+<span id="cb9-135"><a href="#cb9-135" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb9-136"><a href="#cb9-136" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb9-137"><a href="#cb9-137" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1          1.00 ± 0.00</span></span>
+<span id="cb9-138"><a href="#cb9-138" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     1.00 ± 0.00</span></span>
+<span id="cb9-139"><a href="#cb9-139" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     1.00 ± 0.00</span></span>
+<span id="cb9-140"><a href="#cb9-140" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     0.06 ± 0.01</span></span>
+<span id="cb9-141"><a href="#cb9-141" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)     0.87 ± 0.01</span></span>
+<span id="cb9-142"><a href="#cb9-142" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z3)     0.88 ± 0.01</span></span>
+<span id="cb9-143"><a href="#cb9-143" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1:cgm(z1)  0.99 ± 0.00</span></span>
+<span id="cb9-144"><a href="#cb9-144" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test 1.00 ± 0.00</span></span>
+<span id="cb9-145"><a href="#cb9-145" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-146"><a href="#cb9-146" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.4, n_within = 5, n_between = 100</span></span>
+<span id="cb9-147"><a href="#cb9-147" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb9-148"><a href="#cb9-148" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb9-149"><a href="#cb9-149" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1          1.00 ± 0.00</span></span>
+<span id="cb9-150"><a href="#cb9-150" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.99 ± 0.01</span></span>
+<span id="cb9-151"><a href="#cb9-151" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.99 ± 0.00</span></span>
+<span id="cb9-152"><a href="#cb9-152" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     0.04 ± 0.01</span></span>
+<span id="cb9-153"><a href="#cb9-153" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)     0.92 ± 0.01</span></span>
+<span id="cb9-154"><a href="#cb9-154" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z3)     0.93 ± 0.01</span></span>
+<span id="cb9-155"><a href="#cb9-155" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1:cgm(z1)  0.98 ± 0.01</span></span>
+<span id="cb9-156"><a href="#cb9-156" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test 1.00 ± 0.00</span></span>
+<span id="cb9-157"><a href="#cb9-157" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-158"><a href="#cb9-158" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.6, n_within = 5, n_between = 100</span></span>
+<span id="cb9-159"><a href="#cb9-159" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb9-160"><a href="#cb9-160" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb9-161"><a href="#cb9-161" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1          1.00 ± 0.00</span></span>
+<span id="cb9-162"><a href="#cb9-162" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     1.00 ± 0.00</span></span>
+<span id="cb9-163"><a href="#cb9-163" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     1.00 ± 0.00</span></span>
+<span id="cb9-164"><a href="#cb9-164" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     0.04 ± 0.01</span></span>
+<span id="cb9-165"><a href="#cb9-165" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z2)     0.91 ± 0.01</span></span>
+<span id="cb9-166"><a href="#cb9-166" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z3)     0.91 ± 0.01</span></span>
+<span id="cb9-167"><a href="#cb9-167" tabindex="-1"></a><span class="co">#&gt; Fixed:  x1:cgm(z1)  1.00 ± 0.00</span></span>
+<span id="cb9-168"><a href="#cb9-168" tabindex="-1"></a><span class="co">#&gt; Random: Slopes Test 1.00 ± 0.00</span></span>
+<span id="cb9-169"><a href="#cb9-169" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb9-170"><a href="#cb9-170" tabindex="-1"></a><span class="co">#&gt; ℹ Margin of error (MOE) computed as ± 1.96 * standard error</span></span></code></pre></div>
+</div>
+<div id="illustration-3-vignette-cluster-randomized-design" class="section level2">
+<h2>Illustration 3 Vignette: Cluster-Randomized Design</h2>
+<p>The third vignette demonstrates a power analysis for a
+cluster-randomized design (Raudenbush, 1997) where level-2 units are
+randomly assigned to one of two experimental conditions. To provide a
+substantive context, consider a prototypical education example where
+students are nested in schools, and schools are the unit of
+randomization. Intraclass correlations for achievement-related outcomes
+often range between .10 and .25 (Hedges &amp; Hedberg, 2007; Hedges
+&amp; Hedberg, 2013; Sellström &amp; Bremberg, 2006; Spybrook et al.,
+2011; Stockford, 2009). To accommodate uncertainty about this important
+parameter, the simulation investigates intraclass correlation values of
+.10 and .25.</p>
+<p>The multilevel model for the illustration is</p>
+<p><span class="math display">\[
+\begin{split}
+Y_{ij} &amp;= \beta_{0} + \beta_{1}\left( X_{1ij}^{w} + X_{1j}^{b}
+\right) + \beta_{2}\left( X_{2ij}^{w} + X_{2j}^{b} \right)\\
+&amp;\phantom{=}+ \ \beta_{3}\left( X_{3ij}^{w} + X_{3j}^{b} \right) +
+\beta_{4}\left( X_{4ij}^{w} + X_{4j}^{b} \right) + \ \beta_{5}Z_{1j}^{b}
++ b_{0j} + \varepsilon_{ij}
+\end{split}
+\]</span></p>
+<p>where <span class="math inline">\(X_{1}\)</span> to <span class="math inline">\(X_{4}\)</span> are grand mean centered level-1
+covariates, and <span class="math inline">\(Z_{1}\)</span> is a binary
+intervention assignment indicator. Following established notation, the
+<em>w</em> and <em>b</em> superscripts reference within- and
+between-cluster deviation scores, respectively. The notation conveys
+that all level-1 predictors contain within- and between-cluster
+variation. By default, all predictors are centered, including the binary
+dummy code. Grand mean centering a level-2 binary predictor creates an
+ANOVA-like contrast code, such that <span class="math inline">\(\beta_{0}\)</span> is the grand mean and <span class="math inline">\(\beta_{5}\)</span> is the predicted mean
+difference, adjusted for the covariates. Turning to the residual terms,
+<span class="math inline">\(b_{0j}\)</span> is a between-cluster random
+effect that captures residual variation in the cluster-specific
+intercepts, and <span class="math inline">\(\varepsilon_{ij}\)</span> is
+a within-cluster residual. By assumption, both residuals are normal with
+constant variance.</p>
+<p>The key inputs to the model object are the unconditional intraclass
+correlation and effect size values. This illustration investigates power
+for intraclass correlation values of .10 and .25. To mimic a scenario
+with a strong covariate set (e.g., one that includes a pretest measure
+of the outcome), the within-cluster effect size is set to <span class="math inline">\(R_{w}^{2}\)</span> = .18 (a value roughly midway
+between Cohen’s small and medium benchmarks). Most of this variation was
+allocated to <span class="math inline">\(X_{1}\)</span> (the pretest) by
+assigning it a weight of .70, and the remaining three predictors had
+their within-cluster weights set to .10. We previously argued that the
+allocation of the weights among covariates is arbitrary because these
+predictors are not the focus. To demonstrate that point, we conducted a
+second simulation that weighted the four level-1 covariates equally.</p>
+<p>Turning to the level-2 predictor, researchers often prefer the
+Cohen’s (1988) <em>d</em> effect size when working with binary
+explanatory variables. To illustrate, consider power for <em>d</em> =
+.40, the midway point between Cohen’s small and medium benchmarks.
+Substituting this value into the conversion equation below returns <span class="math inline">\(R_{b}^{2}\)</span> = .038.</p>
+<p><span class="math display">\[R^{2} = \frac{d^{2}}{d^{2} +
+4}\]</span></p>
+<p>The following code block shows the <code>mlmpower</code> model object
+for the example.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>example3 <span class="ot">&lt;-</span> (</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>    <span class="fu">effect_size</span>(</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>        <span class="at">icc     =</span> <span class="fu">c</span>(.<span class="dv">10</span>, .<span class="dv">25</span>),</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>        <span class="at">within  =</span> .<span class="dv">18</span>,</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>        <span class="at">between =</span> .<span class="dv">038</span>,</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>    )</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">outcome</span>(<span class="st">&#39;y&#39;</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">within_predictor</span>(<span class="st">&#39;x1&#39;</span>, <span class="at">weight =</span> .<span class="dv">70</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">within_predictor</span>(<span class="st">&#39;x2&#39;</span>, <span class="at">weight =</span> .<span class="dv">10</span>)</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">within_predictor</span>(<span class="st">&#39;x3&#39;</span>, <span class="at">weight =</span> .<span class="dv">10</span>)</span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">within_predictor</span>(<span class="st">&#39;x4&#39;</span>, <span class="at">weight =</span> .<span class="dv">10</span>)</span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">between_binary_predictor</span>(<span class="st">&#39;z1&#39;</span>, <span class="at">proportion =</span> .<span class="dv">50</span>, <span class="at">weight =</span> <span class="dv">1</span>)</span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>)</span></code></pre></div>
+<p>The <code>mlmpower</code> package groups <span class="math inline">\(R^{2}\)</span> values and intraclass correlations
+into a single object called effect_size(), with three inputs separated
+by commas. The within argument corresponds to <span class="math inline">\(R_{w}^{2}\)</span>, the between argument aligns
+with <span class="math inline">\(R_{b}^{2}\)</span>, and the icc
+argument assigns a global intraclass correlation to all level-1
+variables. Separate simulations are performed for each requested
+level.</p>
+<p>Variable attributes for this example require three objects:
+<code>outcome()</code>, <code>within_predictor()</code>, and
+<code>between_binary_predictor()</code>. The first two objects have an
+argument for the variable name, weight (weight =), mean
+(<code>mean =</code>), standard deviation (<code>sd =</code>), and an
+intraclass correlation argument (<code>icc =</code>) that supersedes the
+global setting in <code>effect_size()</code>. The
+<code>between_binary_predictor()</code> object requires a name, weight,
+and the highest category proportion (<code>proportion =</code>).</p>
+<p>The previous code block assigns explicit weights to all variables
+contributing to a given effect, as described previously. The unit weight
+in the <code>between_binary_predictor()</code> object reflects the fact
+that this <span class="math inline">\(Z_{1}\)</span> solely determines
+<span class="math inline">\(R_{b}^{2}\)</span>. Finally, the proportion
+argument assigns a 50/50 split to the level-2 groups.</p>
+<p>The multilevel model parameters also require two sets of
+correlations: within-cluster correlations among level-1 predictors, and
+between-cluster correlations among level-2 predictors (in this case, the
+cluster means and the intervention assignment indicator). These
+correlations are optional, but they can specified using the
+<code>correlations()</code> object. The earlier code block omits this
+object, thereby accepting the default specification. When the
+<code>correlations()</code> object is omitted, the <code>mlmpower</code>
+package iteratively samples all correlations from a uniform distribution
+between .10 and .30, such that the resulting power estimates average
+over a distribution of possible associations. This default range spans
+Cohen’s (1988) small to medium effect size benchmarks, and it also
+brackets common correlations from published research (Bosco et al.,
+2015; Funder &amp; Ozer, 2019; Gignac &amp; Szodorai, 2016). The default
+specifications could be invoked by explicitly appending the
+<code>correlations()</code> object to the earlier script, as
+follows.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>example3 <span class="ot">&lt;-</span> (</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>    example3</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">correlations</span>(</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>        <span class="at">within  =</span> <span class="fu">random</span>(<span class="fl">0.1</span>, <span class="fl">0.3</span>),</span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>        <span class="at">between =</span> <span class="fu">random</span>(<span class="fl">0.1</span>, <span class="fl">0.3</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>    )</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>)</span></code></pre></div>
+<p>Researchers can modify the upper and lower limits of each correlation
+range, or they can specify a constant correlation by inputting a scalar
+value. The illustrative simulations presented in Enders et al. (2023)
+suggest that predictor correlations tend not to matter very much.</p>
+<p>It may be instructive to inspect the population parameters prior to
+running the simulation. Executing <code>summary(example3)</code> returns
+tabular summaries of the multilevel model parameters.</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a><span class="fu">summary</span>(example3)</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="co">#&gt; ! Parameters are solved based on average correlation.</span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="co">#&gt; $`icc = 0.1`</span></span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a><span class="co">#&gt; $r2</span></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co">#&gt;                                          Proportion</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a><span class="co">#&gt; Variance Within-Cluster Fixed Effects    0.18000000</span></span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co">#&gt; Variance Cross-Level Interaction Effects 0.00000000</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt; Variance Random Slopes                   0.00000000</span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt; Within-Cluster Error Variance            0.72000000</span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt; Variance Between-Cluster Fixed Effects   0.07703223</span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co">#&gt; Incremental Variance Level-2 Predictors  0.03800000</span></span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a><span class="co">#&gt; Between Variance Level-1 Covariates      0.03903223</span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="co">#&gt; Variance Random Intercepts               0.02296777</span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a><span class="co">#&gt; $phi_b</span></span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="co">#&gt;                 x1_b       x2_b       x3_b       x4_b  z1_binary</span></span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a><span class="co">#&gt; x1_b      0.10000000 0.02000000 0.02000000 0.02000000 0.03162278</span></span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="co">#&gt; x2_b      0.02000000 0.10000000 0.02000000 0.02000000 0.03162278</span></span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a><span class="co">#&gt; x3_b      0.02000000 0.02000000 0.10000000 0.02000000 0.03162278</span></span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a><span class="co">#&gt; x4_b      0.02000000 0.02000000 0.02000000 0.10000000 0.03162278</span></span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a><span class="co">#&gt; z1_binary 0.03162278 0.03162278 0.03162278 0.03162278 0.25000000</span></span>
+<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-23"><a href="#cb12-23" tabindex="-1"></a><span class="co">#&gt; $phi_p</span></span>
+<span id="cb12-24"><a href="#cb12-24" tabindex="-1"></a><span class="co">#&gt; &lt;0 x 0 matrix&gt;</span></span>
+<span id="cb12-25"><a href="#cb12-25" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-26"><a href="#cb12-26" tabindex="-1"></a><span class="co">#&gt; $phi_w</span></span>
+<span id="cb12-27"><a href="#cb12-27" tabindex="-1"></a><span class="co">#&gt;      x1_w x2_w x3_w x4_w</span></span>
+<span id="cb12-28"><a href="#cb12-28" tabindex="-1"></a><span class="co">#&gt; x1_w 0.90 0.18 0.18 0.18</span></span>
+<span id="cb12-29"><a href="#cb12-29" tabindex="-1"></a><span class="co">#&gt; x2_w 0.18 0.90 0.18 0.18</span></span>
+<span id="cb12-30"><a href="#cb12-30" tabindex="-1"></a><span class="co">#&gt; x3_w 0.18 0.18 0.90 0.18</span></span>
+<span id="cb12-31"><a href="#cb12-31" tabindex="-1"></a><span class="co">#&gt; x4_w 0.18 0.18 0.18 0.90</span></span>
+<span id="cb12-32"><a href="#cb12-32" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-33"><a href="#cb12-33" tabindex="-1"></a><span class="co">#&gt; $mean_Z</span></span>
+<span id="cb12-34"><a href="#cb12-34" tabindex="-1"></a><span class="co">#&gt;  z1 </span></span>
+<span id="cb12-35"><a href="#cb12-35" tabindex="-1"></a><span class="co">#&gt; 0.5 </span></span>
+<span id="cb12-36"><a href="#cb12-36" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-37"><a href="#cb12-37" tabindex="-1"></a><span class="co">#&gt; $mean_X</span></span>
+<span id="cb12-38"><a href="#cb12-38" tabindex="-1"></a><span class="co">#&gt; x1 x2 x3 x4 </span></span>
+<span id="cb12-39"><a href="#cb12-39" tabindex="-1"></a><span class="co">#&gt;  0  0  0  0 </span></span>
+<span id="cb12-40"><a href="#cb12-40" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-41"><a href="#cb12-41" tabindex="-1"></a><span class="co">#&gt; $var_e</span></span>
+<span id="cb12-42"><a href="#cb12-42" tabindex="-1"></a><span class="co">#&gt;           Value</span></span>
+<span id="cb12-43"><a href="#cb12-43" tabindex="-1"></a><span class="co">#&gt; Res. Var.    18</span></span>
+<span id="cb12-44"><a href="#cb12-44" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-45"><a href="#cb12-45" tabindex="-1"></a><span class="co">#&gt; $tau</span></span>
+<span id="cb12-46"><a href="#cb12-46" tabindex="-1"></a><span class="co">#&gt;           Icept</span></span>
+<span id="cb12-47"><a href="#cb12-47" tabindex="-1"></a><span class="co">#&gt; Icept 0.5741943</span></span>
+<span id="cb12-48"><a href="#cb12-48" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-49"><a href="#cb12-49" tabindex="-1"></a><span class="co">#&gt; $gammas</span></span>
+<span id="cb12-50"><a href="#cb12-50" tabindex="-1"></a><span class="co">#&gt;                Value</span></span>
+<span id="cb12-51"><a href="#cb12-51" tabindex="-1"></a><span class="co">#&gt; Icept     10.0000000</span></span>
+<span id="cb12-52"><a href="#cb12-52" tabindex="-1"></a><span class="co">#&gt; x1_w       1.9943101</span></span>
+<span id="cb12-53"><a href="#cb12-53" tabindex="-1"></a><span class="co">#&gt; x2_w       0.2849014</span></span>
+<span id="cb12-54"><a href="#cb12-54" tabindex="-1"></a><span class="co">#&gt; x3_w       0.2849014</span></span>
+<span id="cb12-55"><a href="#cb12-55" tabindex="-1"></a><span class="co">#&gt; x4_w       0.2849014</span></span>
+<span id="cb12-56"><a href="#cb12-56" tabindex="-1"></a><span class="co">#&gt; x1_b       1.9943101</span></span>
+<span id="cb12-57"><a href="#cb12-57" tabindex="-1"></a><span class="co">#&gt; x2_b       0.2849014</span></span>
+<span id="cb12-58"><a href="#cb12-58" tabindex="-1"></a><span class="co">#&gt; x3_b       0.2849014</span></span>
+<span id="cb12-59"><a href="#cb12-59" tabindex="-1"></a><span class="co">#&gt; x4_b       0.2849014</span></span>
+<span id="cb12-60"><a href="#cb12-60" tabindex="-1"></a><span class="co">#&gt; z1_binary  2.0548047</span></span>
+<span id="cb12-61"><a href="#cb12-61" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-62"><a href="#cb12-62" tabindex="-1"></a><span class="co">#&gt; $mean_Y</span></span>
+<span id="cb12-63"><a href="#cb12-63" tabindex="-1"></a><span class="co">#&gt;  y </span></span>
+<span id="cb12-64"><a href="#cb12-64" tabindex="-1"></a><span class="co">#&gt; 10 </span></span>
+<span id="cb12-65"><a href="#cb12-65" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-66"><a href="#cb12-66" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-67"><a href="#cb12-67" tabindex="-1"></a><span class="co">#&gt; $`icc = 0.25`</span></span>
+<span id="cb12-68"><a href="#cb12-68" tabindex="-1"></a><span class="co">#&gt; $r2</span></span>
+<span id="cb12-69"><a href="#cb12-69" tabindex="-1"></a><span class="co">#&gt;                                          Proportion</span></span>
+<span id="cb12-70"><a href="#cb12-70" tabindex="-1"></a><span class="co">#&gt; Variance Within-Cluster Fixed Effects     0.1800000</span></span>
+<span id="cb12-71"><a href="#cb12-71" tabindex="-1"></a><span class="co">#&gt; Variance Cross-Level Interaction Effects  0.0000000</span></span>
+<span id="cb12-72"><a href="#cb12-72" tabindex="-1"></a><span class="co">#&gt; Variance Random Slopes                    0.0000000</span></span>
+<span id="cb12-73"><a href="#cb12-73" tabindex="-1"></a><span class="co">#&gt; Within-Cluster Error Variance             0.5700000</span></span>
+<span id="cb12-74"><a href="#cb12-74" tabindex="-1"></a><span class="co">#&gt; Variance Between-Cluster Fixed Effects    0.1278739</span></span>
+<span id="cb12-75"><a href="#cb12-75" tabindex="-1"></a><span class="co">#&gt; Incremental Variance Level-2 Predictors   0.0380000</span></span>
+<span id="cb12-76"><a href="#cb12-76" tabindex="-1"></a><span class="co">#&gt; Between Variance Level-1 Covariates       0.0898739</span></span>
+<span id="cb12-77"><a href="#cb12-77" tabindex="-1"></a><span class="co">#&gt; Variance Random Intercepts                0.1221261</span></span>
+<span id="cb12-78"><a href="#cb12-78" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-79"><a href="#cb12-79" tabindex="-1"></a><span class="co">#&gt; $phi_b</span></span>
+<span id="cb12-80"><a href="#cb12-80" tabindex="-1"></a><span class="co">#&gt;           x1_b x2_b x3_b x4_b z1_binary</span></span>
+<span id="cb12-81"><a href="#cb12-81" tabindex="-1"></a><span class="co">#&gt; x1_b      0.25 0.05 0.05 0.05      0.05</span></span>
+<span id="cb12-82"><a href="#cb12-82" tabindex="-1"></a><span class="co">#&gt; x2_b      0.05 0.25 0.05 0.05      0.05</span></span>
+<span id="cb12-83"><a href="#cb12-83" tabindex="-1"></a><span class="co">#&gt; x3_b      0.05 0.05 0.25 0.05      0.05</span></span>
+<span id="cb12-84"><a href="#cb12-84" tabindex="-1"></a><span class="co">#&gt; x4_b      0.05 0.05 0.05 0.25      0.05</span></span>
+<span id="cb12-85"><a href="#cb12-85" tabindex="-1"></a><span class="co">#&gt; z1_binary 0.05 0.05 0.05 0.05      0.25</span></span>
+<span id="cb12-86"><a href="#cb12-86" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-87"><a href="#cb12-87" tabindex="-1"></a><span class="co">#&gt; $phi_p</span></span>
+<span id="cb12-88"><a href="#cb12-88" tabindex="-1"></a><span class="co">#&gt; &lt;0 x 0 matrix&gt;</span></span>
+<span id="cb12-89"><a href="#cb12-89" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-90"><a href="#cb12-90" tabindex="-1"></a><span class="co">#&gt; $phi_w</span></span>
+<span id="cb12-91"><a href="#cb12-91" tabindex="-1"></a><span class="co">#&gt;      x1_w x2_w x3_w x4_w</span></span>
+<span id="cb12-92"><a href="#cb12-92" tabindex="-1"></a><span class="co">#&gt; x1_w 0.75 0.15 0.15 0.15</span></span>
+<span id="cb12-93"><a href="#cb12-93" tabindex="-1"></a><span class="co">#&gt; x2_w 0.15 0.75 0.15 0.15</span></span>
+<span id="cb12-94"><a href="#cb12-94" tabindex="-1"></a><span class="co">#&gt; x3_w 0.15 0.15 0.75 0.15</span></span>
+<span id="cb12-95"><a href="#cb12-95" tabindex="-1"></a><span class="co">#&gt; x4_w 0.15 0.15 0.15 0.75</span></span>
+<span id="cb12-96"><a href="#cb12-96" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-97"><a href="#cb12-97" tabindex="-1"></a><span class="co">#&gt; $mean_Z</span></span>
+<span id="cb12-98"><a href="#cb12-98" tabindex="-1"></a><span class="co">#&gt;  z1 </span></span>
+<span id="cb12-99"><a href="#cb12-99" tabindex="-1"></a><span class="co">#&gt; 0.5 </span></span>
+<span id="cb12-100"><a href="#cb12-100" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-101"><a href="#cb12-101" tabindex="-1"></a><span class="co">#&gt; $mean_X</span></span>
+<span id="cb12-102"><a href="#cb12-102" tabindex="-1"></a><span class="co">#&gt; x1 x2 x3 x4 </span></span>
+<span id="cb12-103"><a href="#cb12-103" tabindex="-1"></a><span class="co">#&gt;  0  0  0  0 </span></span>
+<span id="cb12-104"><a href="#cb12-104" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-105"><a href="#cb12-105" tabindex="-1"></a><span class="co">#&gt; $var_e</span></span>
+<span id="cb12-106"><a href="#cb12-106" tabindex="-1"></a><span class="co">#&gt;           Value</span></span>
+<span id="cb12-107"><a href="#cb12-107" tabindex="-1"></a><span class="co">#&gt; Res. Var. 14.25</span></span>
+<span id="cb12-108"><a href="#cb12-108" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-109"><a href="#cb12-109" tabindex="-1"></a><span class="co">#&gt; $tau</span></span>
+<span id="cb12-110"><a href="#cb12-110" tabindex="-1"></a><span class="co">#&gt;          Icept</span></span>
+<span id="cb12-111"><a href="#cb12-111" tabindex="-1"></a><span class="co">#&gt; Icept 3.053152</span></span>
+<span id="cb12-112"><a href="#cb12-112" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-113"><a href="#cb12-113" tabindex="-1"></a><span class="co">#&gt; $gammas</span></span>
+<span id="cb12-114"><a href="#cb12-114" tabindex="-1"></a><span class="co">#&gt;                Value</span></span>
+<span id="cb12-115"><a href="#cb12-115" tabindex="-1"></a><span class="co">#&gt; Icept     10.0000000</span></span>
+<span id="cb12-116"><a href="#cb12-116" tabindex="-1"></a><span class="co">#&gt; x1_w       2.1846572</span></span>
+<span id="cb12-117"><a href="#cb12-117" tabindex="-1"></a><span class="co">#&gt; x2_w       0.3120939</span></span>
+<span id="cb12-118"><a href="#cb12-118" tabindex="-1"></a><span class="co">#&gt; x3_w       0.3120939</span></span>
+<span id="cb12-119"><a href="#cb12-119" tabindex="-1"></a><span class="co">#&gt; x4_w       0.3120939</span></span>
+<span id="cb12-120"><a href="#cb12-120" tabindex="-1"></a><span class="co">#&gt; x1_b       2.1846572</span></span>
+<span id="cb12-121"><a href="#cb12-121" tabindex="-1"></a><span class="co">#&gt; x2_b       0.3120939</span></span>
+<span id="cb12-122"><a href="#cb12-122" tabindex="-1"></a><span class="co">#&gt; x3_b       0.3120939</span></span>
+<span id="cb12-123"><a href="#cb12-123" tabindex="-1"></a><span class="co">#&gt; x4_b       0.3120939</span></span>
+<span id="cb12-124"><a href="#cb12-124" tabindex="-1"></a><span class="co">#&gt; z1_binary  2.0548047</span></span>
+<span id="cb12-125"><a href="#cb12-125" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb12-126"><a href="#cb12-126" tabindex="-1"></a><span class="co">#&gt; $mean_Y</span></span>
+<span id="cb12-127"><a href="#cb12-127" tabindex="-1"></a><span class="co">#&gt;  y </span></span>
+<span id="cb12-128"><a href="#cb12-128" tabindex="-1"></a><span class="co">#&gt; 10</span></span></code></pre></div>
+<p>Having specified the target model, you next use the
+<code>power_analysis()</code> function to conduct the simulations. The
+function requires four inputs: the model argument specifies the
+parameter value object (e.g., <code>example3</code>), the
+<code>replications</code> input specifies the number of artificial data
+sets, <code>n_between</code> is a vector of level-2 sample sizes, and
+<code>n_within</code> is a vector of level-1 sample sizes (i.e., the
+number of observations per cluster). The code block below pairs four
+level-2 sample size values (<span class="math inline">\(J =\)</span> 30,
+60, 90, and 120) with two level-1 sample sizes (<span class="math inline">\(n_{j} =\)</span> 15 or 30 observations per
+cluster), and it requests 2,000 artificial data sets for each
+combination.</p>
+<p>The package uses <code>lme4</code> (Bates et al., 2021) for model
+fitting, and it defaults to an alpha level of .05 for all significance
+tests. Executing <code>summary(powersim)</code> returns the tabular
+summaries of the simulation results shown below.</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># Set seed for replicable results</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">981723</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="co"># Run Power Analysis</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>powersim3 <span class="ot">&lt;-</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>    <span class="fu">power_analysis</span>(</span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a>        <span class="at">model =</span> example3,</span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a>        <span class="at">replications =</span> <span class="dv">2000</span>,</span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>        <span class="at">n_between =</span> <span class="fu">c</span>(<span class="dv">30</span>, <span class="dv">60</span>, <span class="dv">90</span>, <span class="dv">120</span>),</span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>        <span class="at">n_within =</span> <span class="fu">c</span>(<span class="dv">15</span>, <span class="dv">30</span>)</span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>    )</span></code></pre></div>
+<p>The package uses <code>lme4</code> (Bates et al., 2021) for model
+fitting, and it defaults to an alpha level of .05 for all significance
+tests. Executing <code>summary(powersim3)</code> returns the tabular
+summaries of the simulation results shown below.</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">summary</span>(powersim3)</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a><span class="co">#&gt; ── Power Analysis Specification ──</span></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="co">#&gt; Replications = 2000</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="co">#&gt; N_Within = 15 and 30</span></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co">#&gt; N_Between = 30, 60, 90, and 120</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="co">#&gt; ── lme4 Model Syntax</span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="co">#&gt; y ~ 1 + cgm(x1) + cgm(x2) + cgm(x3) + cgm(x4) + cgm(z1) + (1 | `_id`)</span></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="co">#&gt; ℹ cwc() = centering within cluster</span></span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a><span class="co">#&gt; ℹ cgm() = centering with grand mean</span></span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a><span class="co">#&gt; ── Effect Sizes</span></span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a><span class="co">#&gt; • WITHIN = 0.18</span></span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a><span class="co">#&gt; • BETWEEN = 0.038</span></span>
+<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a><span class="co">#&gt; • RANDOM SLOPE = 0</span></span>
+<span id="cb14-21"><a href="#cb14-21" tabindex="-1"></a><span class="co">#&gt; • PRODUCT = 0</span></span>
+<span id="cb14-22"><a href="#cb14-22" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-23"><a href="#cb14-23" tabindex="-1"></a><span class="co">#&gt; ── Power Analysis Results ──</span></span>
+<span id="cb14-24"><a href="#cb14-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-25"><a href="#cb14-25" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.1, n_within = 15, n_between = 30</span></span>
+<span id="cb14-26"><a href="#cb14-26" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb14-27"><a href="#cb14-27" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb14-28"><a href="#cb14-28" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x1)     1.00 ± 0.00</span></span>
+<span id="cb14-29"><a href="#cb14-29" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.27 ± 0.02</span></span>
+<span id="cb14-30"><a href="#cb14-30" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.25 ± 0.02</span></span>
+<span id="cb14-31"><a href="#cb14-31" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x4)     0.26 ± 0.02</span></span>
+<span id="cb14-32"><a href="#cb14-32" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     0.98 ± 0.01</span></span>
+<span id="cb14-33"><a href="#cb14-33" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-34"><a href="#cb14-34" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.25, n_within = 15, n_between = 30</span></span>
+<span id="cb14-35"><a href="#cb14-35" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb14-36"><a href="#cb14-36" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb14-37"><a href="#cb14-37" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x1)     1.00 ± 0.00</span></span>
+<span id="cb14-38"><a href="#cb14-38" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.30 ± 0.02</span></span>
+<span id="cb14-39"><a href="#cb14-39" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.31 ± 0.02</span></span>
+<span id="cb14-40"><a href="#cb14-40" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x4)     0.31 ± 0.02</span></span>
+<span id="cb14-41"><a href="#cb14-41" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     0.76 ± 0.02</span></span>
+<span id="cb14-42"><a href="#cb14-42" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-43"><a href="#cb14-43" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.1, n_within = 30, n_between = 30</span></span>
+<span id="cb14-44"><a href="#cb14-44" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb14-45"><a href="#cb14-45" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb14-46"><a href="#cb14-46" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x1)     1.00 ± 0.00</span></span>
+<span id="cb14-47"><a href="#cb14-47" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.45 ± 0.02</span></span>
+<span id="cb14-48"><a href="#cb14-48" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.46 ± 0.02</span></span>
+<span id="cb14-49"><a href="#cb14-49" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x4)     0.48 ± 0.02</span></span>
+<span id="cb14-50"><a href="#cb14-50" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     1.00 ± 0.00</span></span>
+<span id="cb14-51"><a href="#cb14-51" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-52"><a href="#cb14-52" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.25, n_within = 30, n_between = 30</span></span>
+<span id="cb14-53"><a href="#cb14-53" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb14-54"><a href="#cb14-54" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb14-55"><a href="#cb14-55" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x1)     1.00 ± 0.00</span></span>
+<span id="cb14-56"><a href="#cb14-56" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.54 ± 0.02</span></span>
+<span id="cb14-57"><a href="#cb14-57" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.54 ± 0.02</span></span>
+<span id="cb14-58"><a href="#cb14-58" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x4)     0.53 ± 0.02</span></span>
+<span id="cb14-59"><a href="#cb14-59" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     0.79 ± 0.02</span></span>
+<span id="cb14-60"><a href="#cb14-60" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-61"><a href="#cb14-61" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.1, n_within = 15, n_between = 60</span></span>
+<span id="cb14-62"><a href="#cb14-62" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb14-63"><a href="#cb14-63" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb14-64"><a href="#cb14-64" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x1)     1.00 ± 0.00</span></span>
+<span id="cb14-65"><a href="#cb14-65" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.46 ± 0.02</span></span>
+<span id="cb14-66"><a href="#cb14-66" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.48 ± 0.02</span></span>
+<span id="cb14-67"><a href="#cb14-67" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x4)     0.47 ± 0.02</span></span>
+<span id="cb14-68"><a href="#cb14-68" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     1.00 ± 0.00</span></span>
+<span id="cb14-69"><a href="#cb14-69" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-70"><a href="#cb14-70" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.25, n_within = 15, n_between = 60</span></span>
+<span id="cb14-71"><a href="#cb14-71" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb14-72"><a href="#cb14-72" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb14-73"><a href="#cb14-73" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x1)     1.00 ± 0.00</span></span>
+<span id="cb14-74"><a href="#cb14-74" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.54 ± 0.02</span></span>
+<span id="cb14-75"><a href="#cb14-75" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.53 ± 0.02</span></span>
+<span id="cb14-76"><a href="#cb14-76" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x4)     0.55 ± 0.02</span></span>
+<span id="cb14-77"><a href="#cb14-77" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     0.98 ± 0.01</span></span>
+<span id="cb14-78"><a href="#cb14-78" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-79"><a href="#cb14-79" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.1, n_within = 30, n_between = 60</span></span>
+<span id="cb14-80"><a href="#cb14-80" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb14-81"><a href="#cb14-81" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb14-82"><a href="#cb14-82" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x1)     1.00 ± 0.00</span></span>
+<span id="cb14-83"><a href="#cb14-83" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.76 ± 0.02</span></span>
+<span id="cb14-84"><a href="#cb14-84" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.75 ± 0.02</span></span>
+<span id="cb14-85"><a href="#cb14-85" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x4)     0.75 ± 0.02</span></span>
+<span id="cb14-86"><a href="#cb14-86" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     1.00 ± 0.00</span></span>
+<span id="cb14-87"><a href="#cb14-87" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-88"><a href="#cb14-88" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.25, n_within = 30, n_between = 60</span></span>
+<span id="cb14-89"><a href="#cb14-89" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb14-90"><a href="#cb14-90" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb14-91"><a href="#cb14-91" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x1)     1.00 ± 0.00</span></span>
+<span id="cb14-92"><a href="#cb14-92" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.83 ± 0.02</span></span>
+<span id="cb14-93"><a href="#cb14-93" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.83 ± 0.02</span></span>
+<span id="cb14-94"><a href="#cb14-94" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x4)     0.84 ± 0.02</span></span>
+<span id="cb14-95"><a href="#cb14-95" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     0.99 ± 0.00</span></span>
+<span id="cb14-96"><a href="#cb14-96" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-97"><a href="#cb14-97" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.1, n_within = 15, n_between = 90</span></span>
+<span id="cb14-98"><a href="#cb14-98" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb14-99"><a href="#cb14-99" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb14-100"><a href="#cb14-100" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x1)     1.00 ± 0.00</span></span>
+<span id="cb14-101"><a href="#cb14-101" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.64 ± 0.02</span></span>
+<span id="cb14-102"><a href="#cb14-102" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.63 ± 0.02</span></span>
+<span id="cb14-103"><a href="#cb14-103" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x4)     0.63 ± 0.02</span></span>
+<span id="cb14-104"><a href="#cb14-104" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     1.00 ± 0.00</span></span>
+<span id="cb14-105"><a href="#cb14-105" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-106"><a href="#cb14-106" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.25, n_within = 15, n_between = 90</span></span>
+<span id="cb14-107"><a href="#cb14-107" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb14-108"><a href="#cb14-108" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb14-109"><a href="#cb14-109" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x1)     1.00 ± 0.00</span></span>
+<span id="cb14-110"><a href="#cb14-110" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.72 ± 0.02</span></span>
+<span id="cb14-111"><a href="#cb14-111" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.71 ± 0.02</span></span>
+<span id="cb14-112"><a href="#cb14-112" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x4)     0.71 ± 0.02</span></span>
+<span id="cb14-113"><a href="#cb14-113" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     1.00 ± 0.00</span></span>
+<span id="cb14-114"><a href="#cb14-114" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-115"><a href="#cb14-115" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.1, n_within = 30, n_between = 90</span></span>
+<span id="cb14-116"><a href="#cb14-116" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb14-117"><a href="#cb14-117" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb14-118"><a href="#cb14-118" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x1)     1.00 ± 0.00</span></span>
+<span id="cb14-119"><a href="#cb14-119" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.90 ± 0.01</span></span>
+<span id="cb14-120"><a href="#cb14-120" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.90 ± 0.01</span></span>
+<span id="cb14-121"><a href="#cb14-121" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x4)     0.89 ± 0.01</span></span>
+<span id="cb14-122"><a href="#cb14-122" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     1.00 ± 0.00</span></span>
+<span id="cb14-123"><a href="#cb14-123" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-124"><a href="#cb14-124" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.25, n_within = 30, n_between = 90</span></span>
+<span id="cb14-125"><a href="#cb14-125" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb14-126"><a href="#cb14-126" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb14-127"><a href="#cb14-127" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x1)     1.00 ± 0.00</span></span>
+<span id="cb14-128"><a href="#cb14-128" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.95 ± 0.01</span></span>
+<span id="cb14-129"><a href="#cb14-129" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.95 ± 0.01</span></span>
+<span id="cb14-130"><a href="#cb14-130" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x4)     0.95 ± 0.01</span></span>
+<span id="cb14-131"><a href="#cb14-131" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     1.00 ± 0.00</span></span>
+<span id="cb14-132"><a href="#cb14-132" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-133"><a href="#cb14-133" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.1, n_within = 15, n_between = 120</span></span>
+<span id="cb14-134"><a href="#cb14-134" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb14-135"><a href="#cb14-135" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb14-136"><a href="#cb14-136" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x1)     1.00 ± 0.00</span></span>
+<span id="cb14-137"><a href="#cb14-137" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.75 ± 0.02</span></span>
+<span id="cb14-138"><a href="#cb14-138" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.75 ± 0.02</span></span>
+<span id="cb14-139"><a href="#cb14-139" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x4)     0.77 ± 0.02</span></span>
+<span id="cb14-140"><a href="#cb14-140" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     1.00 ± 0.00</span></span>
+<span id="cb14-141"><a href="#cb14-141" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-142"><a href="#cb14-142" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.25, n_within = 15, n_between = 120</span></span>
+<span id="cb14-143"><a href="#cb14-143" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb14-144"><a href="#cb14-144" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb14-145"><a href="#cb14-145" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x1)     1.00 ± 0.00</span></span>
+<span id="cb14-146"><a href="#cb14-146" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.84 ± 0.02</span></span>
+<span id="cb14-147"><a href="#cb14-147" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.83 ± 0.02</span></span>
+<span id="cb14-148"><a href="#cb14-148" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x4)     0.84 ± 0.02</span></span>
+<span id="cb14-149"><a href="#cb14-149" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     1.00 ± 0.00</span></span>
+<span id="cb14-150"><a href="#cb14-150" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-151"><a href="#cb14-151" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.1, n_within = 30, n_between = 120</span></span>
+<span id="cb14-152"><a href="#cb14-152" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb14-153"><a href="#cb14-153" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb14-154"><a href="#cb14-154" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x1)     1.00 ± 0.00</span></span>
+<span id="cb14-155"><a href="#cb14-155" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.96 ± 0.01</span></span>
+<span id="cb14-156"><a href="#cb14-156" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.96 ± 0.01</span></span>
+<span id="cb14-157"><a href="#cb14-157" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x4)     0.97 ± 0.01</span></span>
+<span id="cb14-158"><a href="#cb14-158" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     1.00 ± 0.00</span></span>
+<span id="cb14-159"><a href="#cb14-159" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-160"><a href="#cb14-160" tabindex="-1"></a><span class="co">#&gt; ── global icc = 0.25, n_within = 30, n_between = 120</span></span>
+<span id="cb14-161"><a href="#cb14-161" tabindex="-1"></a><span class="co">#&gt;                     Power      </span></span>
+<span id="cb14-162"><a href="#cb14-162" tabindex="-1"></a><span class="co">#&gt; Fixed:  (Intercept) 1.00 ± 0.00</span></span>
+<span id="cb14-163"><a href="#cb14-163" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x1)     1.00 ± 0.00</span></span>
+<span id="cb14-164"><a href="#cb14-164" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x2)     0.98 ± 0.01</span></span>
+<span id="cb14-165"><a href="#cb14-165" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x3)     0.99 ± 0.01</span></span>
+<span id="cb14-166"><a href="#cb14-166" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(x4)     0.98 ± 0.01</span></span>
+<span id="cb14-167"><a href="#cb14-167" tabindex="-1"></a><span class="co">#&gt; Fixed:  cgm(z1)     1.00 ± 0.00</span></span>
+<span id="cb14-168"><a href="#cb14-168" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb14-169"><a href="#cb14-169" tabindex="-1"></a><span class="co">#&gt; ℹ Margin of error (MOE) computed as ± 1.96 * standard error</span></span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
