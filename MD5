@@ -1,6 +1,6 @@
-bf07ba9c65dc7a0f649200824c9dbf67 *DESCRIPTION
+897786d72935f1f0f84827a6b554e7fc *DESCRIPTION
 17876803e094fc27deedb1dd0dbb21fe *NAMESPACE
-112ebf0f9e871bf22174990a8b28e7db *NEWS.md
+c18dcbcb866dd9d40c6b1f76217e4199 *NEWS.md
 0cd4361add27bdb515a6dd884fc2279d *R/actions.R
 026245955de867233459ef72d4965206 *R/base.R
 3e282840ddbae848775a7a6ba3db6391 *R/correlations.R
@@ -12,8 +12,8 @@ a811ac3474ed5650ac06cde07d2b07ca *R/model.R
 2cb1b53d80abf670c95e93fc010dc1de *R/utils.R
 0e1e21da19729c280b980f9dd64b844f *R/variables.R
 2b44405602b8cec7186fe60b6456f86f *R/zzz.R
-678f538295330f90563ea9607926f450 *README.md
-80e7fbc29f043f41db39a0655b1a668f *build/vignette.rds
+0c6ac287f33b52e50fb0f1962994c021 *README.md
+796306bfc8a62ee18ad0c39dd4bceeb5 *build/vignette.rds
 b5c269823025d33c965d84297c998a29 *inst/doc/mlmpower.R
 ec3bdb666e04605dba12f34cdbcc312e *inst/doc/mlmpower.Rmd
 1bfd6778f83b2b5fcfe4b820309e3522 *inst/doc/mlmpower.html
