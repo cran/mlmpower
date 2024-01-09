@@ -35,6 +35,14 @@ based on a constructed \code{\link{mp_model}}.
 }
 \details{
 Specifying multiple \code{n_within} and \code{n_between} will produce a full factorial simulation design.
+
+Specify a \code{mechanism} argument to pass down to the \code{\link{generate}} function.
+See the details of \code{\link{generate}} for more information about specifying missing data mechanisms.
+See \code{\link{mechanisms}} for predefined missing data mechanisms.
+
+Specify an \code{analyze} argument to use custom analysis functions. These functions should map onto
+\code{\link{analyze}}'s structure, but can allow for things like specifying multiple imputations etc.
+This is considered an advance usage that requires extreme care and caution.
 }
 \examples{
 # Create Model
@@ -48,4 +56,14 @@ set.seed(19723)
 # Create data set and analyze
 # Note: Generally Use more than 50 replications
 model |> power_analysis(50, 5, 50)
+
+# Induce missing data on outcome with built in mechanisms
+set.seed(19723)
+model |> power_analysis(50, 5, 50, mechanism = MCAR(0.25)) -> powersim_mcar
+
+}
+\seealso{
+\code{\link[=generate]{generate()}}
+
+\link{mechanisms}
 }

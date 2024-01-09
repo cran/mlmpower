@@ -1,7 +1,7 @@
 Package: mlmpower
 Type: Package
 Title: Power Analysis and Data Simulation for Multilevel Models
-Version: 1.0.3
+Version: 1.0.4
 Authors@R: person("Brian T.", "Keller", email = "btkeller@missouri.edu",
   role = c("aut", "cre", "cph"))
 Description: 
@@ -23,8 +23,8 @@ Imports: cli, lme4, lmerTest, varTestnlme
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2023-11-07 22:17:44 UTC; Bry
+Packaged: 2024-01-08 19:05:46 UTC; Bry
 Author: Brian T. Keller [aut, cre, cph]
 Maintainer: Brian T. Keller <btkeller@missouri.edu>
 Repository: CRAN
-Date/Publication: 2023-11-07 23:20:02 UTC
+Date/Publication: 2024-01-09 01:10:02 UTC

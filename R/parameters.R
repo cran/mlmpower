@@ -1,9 +1,20 @@
-#' @rdname Parameters
-#' @title `mlmpower` Modeling Framework
-#' @name Parameters
-#' @aliases mp_parameters parameters
-#' @description Test
-# TODO finish this documentation
+#' @rdname mp_parameters
+#' @title `mp_parameters` Object for `mlmpower`
+#' @name mp_parameters
+#' @seealso
+#' [mlmpower::parameters]
+#' @description
+#' An S3 class that contains an [`base::environment`] with the following objects:
+#' - `r2`: The population proportion of variance explained
+#' - `phi_b`: The population predictor covariance matrix for between
+#' - `phi_p`: The population within cluster covariance matrix for products
+#' - `phi_w`: The population predictor covariance matrix for within
+#' - `mean_Z`: The population mean for level-2 predictors
+#' - `mean_X`: The population mean for level-1 predictors
+#' - `var_e`: The population within residual variance
+#' - `tau`: The population level-2 covariance matrix
+#' - `gammas`: The regression coefficients
+#' - `mean_Y`: The population mean of the outcome
 NULL
 
 #' Internal function to convert `mp_model` object to an environment
@@ -404,9 +415,9 @@ is.parameters <- function(x) {
     inherits(x, "mp_parameters")
 }
 
-#' Convert `mp_parameters` object to a formula for `lme4`
+#' Internal function ti convert `mp_parameters` object to a formula for `lme4`
 #' @noRd
-to_formula <- function(x, e = globalenv(), nested = FALSE) {
+`_to_formula` <- function(x, e = globalenv(), nested = FALSE) {
 
     # Get regression coefficients
     gammas <- if (is.null(attr(x, '_gammas'))) x$gammas else attr(x, '_gammas')
@@ -469,6 +480,48 @@ to_formula <- function(x, e = globalenv(), nested = FALSE) {
     }
     lme4_model <- paste0(names(x$mean_Y), " ~ ", model_fixed, " + ", model_random)
     return(as.formula(lme4_model, e))
+}
+
+#' Convert [`mlmpower::mp_data`] to a [`stats::formula`] to be used for [`lme4::lmer`]
+#' @description
+#' Produces the formula including the centering functions based on a data set generated with [`mlmpower::generate`].
+#' @param data the [`mlmpower::mp_data`] to be coerced.
+#' @param nested logical value, if true then produce the nested restricted model
+#' @returns a [`stats::formula`]
+#' @examples
+#' # Specify model
+#' model <- (
+#'     outcome('Y')
+#'     + within_predictor('X')
+#'     + effect_size(
+#'         icc = 0.2,
+#'         within = 0.3
+#'     )
+#' )
+#' # Set seed
+#' set.seed(198723)
+#' # Create formula based on data set
+#' model |> generate(5, 50) |> to_formula()
+#' @export
+to_formula <- function(data, nested = FALSE) {
+
+    if (!is.mp_data(data)) throw_error(
+        '{.arg data} must be of a {.cli mp_data} object.'
+    )
+    # Check id name
+    if (is.null(data$`_id`)) throw_error(
+        '{.arg data} must have `_id` as the first variable.'
+    )
+    # Check nested
+    if (!is.logical(nested) & length(nested) == 1) throw_error(
+        "{.arg nested} must be a single logical value"
+    )
+
+    # Get centering environment
+    data$`_id` |> centering_env() -> e
+
+    # Return formulas for model
+    data |> attr('parameters')  |> `_to_formula`(e, nested = nested)
 }
 
 #' Convert [`mlmpower::mp_parameters`] to a [`list`]
@@ -540,5 +593,62 @@ average <- function(e1, e2) {
         )
     }
     return(e1)
+}
+
+
+#' @title Obtain [`mlmpower::mp_parameters`] from objects
+#' @description
+#' A generic function to obtain [`mlmpower::mp_parameters`] from defined models and data sets.
+#' @param object an object which the [`mlmpower::mp_parameters`] are desired.
+#' @returns A [`mlmpower::mp_parameters`] object
+#' @details
+#' Currently object can be:
+#' - [`mlmpower::mp_model`]
+#' - [`mlmpower::mp_data`]
+#' - [`mlmpower::mp_power`]
+#'
+#' If using on a  [`mlmpower::mp_model`] and the  model has random correlations
+#' then the average is used.
+#' @export
+parameters <- function(object) {
+    UseMethod('parameters')
+}
+
+#' @rdname parameters
+#' @examples
+#' # Create Model
+#' model <- (
+#'     outcome('Y')
+#'     + within_predictor('X')
+#'     + effect_size(icc = 0.1)
+#' )
+#'
+#' # Create data set and obtain population parameters
+#' model |> parameters()
+#' @export
+parameters.mp_model <- function(object) {
+    object |> summary()
+}
+
+#' @rdname parameters
+#' @examples
+#' # Set seed
+#' set.seed(198723)
+#' # Create data set and obtain population parameters
+#' model |> generate(5, 50) |> parameters()
+#' @export
+parameters.mp_data <- function(object) {
+    object |> attr('parameters') |> clean_parameters()
+}
+
+#' @rdname parameters
+#' @export
+#' @examples
+#' # Set seed
+#' set.seed(198723)
+#' # Create data set and obtain population parameters
+#' model |> power_analysis(50, 5, 50) |> parameters()
+parameters.mp_power <- function(object) {
+    object$mean_parameters
 }
 
