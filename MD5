@@ -1,6 +1,6 @@
-0287fe09302a082dc3541b3bc832972b *DESCRIPTION
+e10f276d883c1b23d7b268901c635413 *DESCRIPTION
 8437088876d572b1718dd8ff455e39e6 *NAMESPACE
-caef5e24f78eabd73357dd3623d5a421 *NEWS.md
+e2a7a35b9865d3509c46d57e208089d2 *NEWS.md
 0cd4361add27bdb515a6dd884fc2279d *R/actions.R
 026245955de867233459ef72d4965206 *R/base.R
 3e282840ddbae848775a7a6ba3db6391 *R/correlations.R
@@ -9,15 +9,15 @@ c6fc745ea50bf9fa9fdbac29f28c6676 *R/list.R
 6164a4b13643c2161cd7966b7bbacac3 *R/mechanisms.R
 a811ac3474ed5650ac06cde07d2b07ca *R/model.R
 8f466b59339c57862477994385239933 *R/parameters.R
-3df9fbc6c9923975e2d2f62a6fb30cd8 *R/simulation.R
+edaddd5a82f3a28025a0b517155e1821 *R/simulation.R
 94daf68205ce8ca8b1c4736ee72c595e *R/utils.R
 0e1e21da19729c280b980f9dd64b844f *R/variables.R
 2b44405602b8cec7186fe60b6456f86f *R/zzz.R
-0c6ac287f33b52e50fb0f1962994c021 *README.md
+741a16407e2866401a8e3630662bb868 *README.md
 cd4b06fa588b3a7b100e5b72a2e863f1 *build/vignette.rds
 e414c2594bc47f718369d29a94d4b620 *inst/doc/mlmpower.R
 ec3bdb666e04605dba12f34cdbcc312e *inst/doc/mlmpower.Rmd
-dc71f7a34af9bf47cd808561a6b43cd7 *inst/doc/mlmpower.html
+3b281febf67f744657d40bf894947e6e *inst/doc/mlmpower.html
 d091dc6d2f5276f97a6bbfdfb4e90655 *man/analyze.Rd
 3b66e9bfd0187357284dcb248275afd8 *man/as.data.frame.mp_power.Rd
 71fe87418c9b859c97b423ce16f945b0 *man/as.list.mp_parameters.Rd
@@ -46,6 +46,6 @@ c421538824a76a129a15d60ca29cc6ed *man/summary.mp_model.Rd
 9000d7d0d92ac128d11a77b5156cdd16 *man/summary.mp_power.Rd
 7bcc525b4fb2a42b7f5f1eee0dc8c0e0 *man/to_formula.Rd
 ec3bdb666e04605dba12f34cdbcc312e *vignettes/mlmpower.Rmd
-1d937ed503787bbf0d966dd191460465 *vignettes/powersim1.rds
-40a2ad6d32171cf3a553d050396cd0ae *vignettes/powersim2.rds
-94e7ecb81b733c852ba19fce825eed4d *vignettes/powersim3.rds
+0e17b41f24470709e4aebe1cc0017312 *vignettes/powersim1.rds
+7704823e0d495b88e54e13509cd992ac *vignettes/powersim2.rds
+39cfb8cdf458fc866f74896d4546fd5e *vignettes/powersim3.rds
