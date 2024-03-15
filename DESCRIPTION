@@ -1,7 +1,7 @@
 Package: mlmpower
 Type: Package
 Title: Power Analysis and Data Simulation for Multilevel Models
-Version: 1.0.5
+Version: 1.0.6
 Authors@R: person("Brian T.", "Keller", email = "btkeller@missouri.edu",
   role = c("aut", "cre", "cph"))
 Description: 
@@ -15,7 +15,7 @@ Description:
     and accommodate models with multiple interaction effects.
 License: GPL-3
 Encoding: UTF-8
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 URL: https://github.com/bkeller2/mlmpower
 BugReports: https://github.com/bkeller2/mlmpower/issues
 Depends: R (>= 4.0.0)
@@ -23,8 +23,8 @@ Imports: cli, lme4, lmerTest, varTestnlme
 Suggests: knitr, rmarkdown
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2024-01-28 14:32:19 UTC; Bry
+Packaged: 2024-03-15 18:00:25 UTC; Bry
 Author: Brian T. Keller [aut, cre, cph]
 Maintainer: Brian T. Keller <btkeller@missouri.edu>
 Repository: CRAN
-Date/Publication: 2024-01-29 09:20:02 UTC
+Date/Publication: 2024-03-15 18:20:02 UTC
