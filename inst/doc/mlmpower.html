@@ -445,8 +445,8 @@ for the example.</p>
 <span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">random_slope</span>(<span class="st">&#39;x1&#39;</span>, <span class="at">weight =</span> <span class="dv">1</span>)</span>
 <span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a>)</span></code></pre></div>
 <p>The <code>mlmpower</code> package groups <span class="math inline">\(R^{2}\)</span> values and intraclass correlations
-into a single object called effect_size(), with the five inputs
-separated by commas. The within argument corresponds to <span class="math inline">\(R_{w}^{2}\)</span>, the between argument aligns
+into a single object called <code>effect_size()</code>, with the five
+inputs separated by commas. The within argument corresponds to <span class="math inline">\(R_{w}^{2}\)</span>, the between argument aligns
 with <span class="math inline">\(R_{b}^{2}\)</span>, the product
 argument specifies <span class="math inline">\(R_{p}^{2}\)</span>, and
 the random_slope argument corresponds to <span class="math inline">\(R_{rc}^{2}\)</span>. The icc argument assigns a
@@ -1122,14 +1122,14 @@ tabular summaries of the multilevel model parameters.</p>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; $`icc = 0.4`</span></span>
 <span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; $r2</span></span>
 <span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt;                                          Proportion</span></span>
-<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt; Variance Within-Cluster Fixed Effects    0.13000000</span></span>
-<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt; Variance Cross-Level Interaction Effects 0.03000000</span></span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; Variance Random Slopes                   0.10000000</span></span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; Within-Cluster Error Variance            0.34000000</span></span>
-<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt; Variance Between-Cluster Fixed Effects   0.12474120</span></span>
-<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt; Incremental Variance Level-2 Predictors  0.06500000</span></span>
-<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; Between Variance Level-1 Covariates      0.05974120</span></span>
-<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; Variance Random Intercepts               0.03964212</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt; Variance Within-Cluster Fixed Effects     0.1300000</span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#&gt; Variance Cross-Level Interaction Effects  0.0300000</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; Variance Random Slopes                    0.1000000</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; Within-Cluster Error Variance             0.3400000</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt; Variance Between-Cluster Fixed Effects    0.1247412</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt; Incremental Variance Level-2 Predictors   0.0650000</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; Between Variance Level-1 Covariates       0.0597412</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#&gt; Variance Random Intercepts                0.2752588</span></span>
 <span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#&gt; $phi_b</span></span>
 <span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#&gt;                 x2_b       x3_b  z1_binary         z2         z3</span></span>
@@ -1163,8 +1163,8 @@ tabular summaries of the multilevel model parameters.</p>
 <span id="cb7-44"><a href="#cb7-44" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb7-45"><a href="#cb7-45" tabindex="-1"></a><span class="co">#&gt; $tau</span></span>
 <span id="cb7-46"><a href="#cb7-46" tabindex="-1"></a><span class="co">#&gt;          Icept     x1_w</span></span>
-<span id="cb7-47"><a href="#cb7-47" tabindex="-1"></a><span class="co">#&gt; Icept 3.964212 1.780834</span></span>
-<span id="cb7-48"><a href="#cb7-48" tabindex="-1"></a><span class="co">#&gt; x1_w  1.780834 5.000000</span></span>
+<span id="cb7-47"><a href="#cb7-47" tabindex="-1"></a><span class="co">#&gt; Icept 2.208745 1.329284</span></span>
+<span id="cb7-48"><a href="#cb7-48" tabindex="-1"></a><span class="co">#&gt; x1_w  1.329284 5.000000</span></span>
 <span id="cb7-49"><a href="#cb7-49" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb7-50"><a href="#cb7-50" tabindex="-1"></a><span class="co">#&gt; $gammas</span></span>
 <span id="cb7-51"><a href="#cb7-51" tabindex="-1"></a><span class="co">#&gt;                    Value</span></span>
@@ -1193,7 +1193,7 @@ tabular summaries of the multilevel model parameters.</p>
 <span id="cb7-74"><a href="#cb7-74" tabindex="-1"></a><span class="co">#&gt; Variance Between-Cluster Fixed Effects    0.1696753</span></span>
 <span id="cb7-75"><a href="#cb7-75" tabindex="-1"></a><span class="co">#&gt; Incremental Variance Level-2 Predictors   0.0650000</span></span>
 <span id="cb7-76"><a href="#cb7-76" tabindex="-1"></a><span class="co">#&gt; Between Variance Level-1 Covariates       0.1046753</span></span>
-<span id="cb7-77"><a href="#cb7-77" tabindex="-1"></a><span class="co">#&gt; Variance Random Intercepts                0.1589955</span></span>
+<span id="cb7-77"><a href="#cb7-77" tabindex="-1"></a><span class="co">#&gt; Variance Random Intercepts                0.4303247</span></span>
 <span id="cb7-78"><a href="#cb7-78" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb7-79"><a href="#cb7-79" tabindex="-1"></a><span class="co">#&gt; $phi_b</span></span>
 <span id="cb7-80"><a href="#cb7-80" tabindex="-1"></a><span class="co">#&gt;                 x2_b       x3_b  z1_binary         z2         z3</span></span>
@@ -1226,9 +1226,9 @@ tabular summaries of the multilevel model parameters.</p>
 <span id="cb7-107"><a href="#cb7-107" tabindex="-1"></a><span class="co">#&gt; Res. Var.    14</span></span>
 <span id="cb7-108"><a href="#cb7-108" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb7-109"><a href="#cb7-109" tabindex="-1"></a><span class="co">#&gt; $tau</span></span>
-<span id="cb7-110"><a href="#cb7-110" tabindex="-1"></a><span class="co">#&gt;          Icept    x1_w</span></span>
-<span id="cb7-111"><a href="#cb7-111" tabindex="-1"></a><span class="co">#&gt; Icept 15.89955 3.56646</span></span>
-<span id="cb7-112"><a href="#cb7-112" tabindex="-1"></a><span class="co">#&gt; x1_w   3.56646 5.00000</span></span>
+<span id="cb7-110"><a href="#cb7-110" tabindex="-1"></a><span class="co">#&gt;           Icept     x1_w</span></span>
+<span id="cb7-111"><a href="#cb7-111" tabindex="-1"></a><span class="co">#&gt; Icept 11.108290 2.981045</span></span>
+<span id="cb7-112"><a href="#cb7-112" tabindex="-1"></a><span class="co">#&gt; x1_w   2.981045 5.000000</span></span>
 <span id="cb7-113"><a href="#cb7-113" tabindex="-1"></a><span class="co">#&gt; </span></span>
 <span id="cb7-114"><a href="#cb7-114" tabindex="-1"></a><span class="co">#&gt; $gammas</span></span>
 <span id="cb7-115"><a href="#cb7-115" tabindex="-1"></a><span class="co">#&gt;                    Value</span></span>
@@ -1519,8 +1519,8 @@ for the example.</p>
 <span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>    <span class="sc">+</span> <span class="fu">between_binary_predictor</span>(<span class="st">&#39;z1&#39;</span>, <span class="at">proportion =</span> .<span class="dv">50</span>, <span class="at">weight =</span> <span class="dv">1</span>)</span>
 <span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>)</span></code></pre></div>
 <p>The <code>mlmpower</code> package groups <span class="math inline">\(R^{2}\)</span> values and intraclass correlations
-into a single object called effect_size(), with three inputs separated
-by commas. The within argument corresponds to <span class="math inline">\(R_{w}^{2}\)</span>, the between argument aligns
+into a single object called <code>effect_size()</code>, with three
+inputs separated by commas. The within argument corresponds to <span class="math inline">\(R_{w}^{2}\)</span>, the between argument aligns
 with <span class="math inline">\(R_{b}^{2}\)</span>, and the icc
 argument assigns a global intraclass correlation to all level-1
 variables. Separate simulations are performed for each requested
