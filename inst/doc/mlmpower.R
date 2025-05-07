@@ -59,17 +59,17 @@ example1 <- (
 summary(example1)
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  # Set seed for replicable results
-#  set.seed(2318971)
-#  
-#  # Run Power Analysis
-#  powersim1 <-
-#      power_analysis(
-#          model = example1,
-#          replications = 2000,
-#          n_between = c(30, 60, 90, 120),
-#          n_within = c(10, 20, 30)
-#      )
+# # Set seed for replicable results
+# set.seed(2318971)
+# 
+# # Run Power Analysis
+# powersim1 <-
+#     power_analysis(
+#         model = example1,
+#         replications = 2000,
+#         n_between = c(30, 60, 90, 120),
+#         n_within = c(10, 20, 30)
+#     )
 
 ## -----------------------------------------------------------------------------
 summary(powersim1)
@@ -103,17 +103,17 @@ example2 <- (
 summary(example2)
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  # Set seed for replicable results
-#  set.seed(12379)
-#  
-#  # Run Power Analysis
-#  powersim2 <-
-#      power_analysis(
-#          model = example2,
-#          replications = 2000,
-#          n_between = c(50, 60, 70, 80, 90, 100),
-#          n_within = 5
-#      )
+# # Set seed for replicable results
+# set.seed(12379)
+# 
+# # Run Power Analysis
+# powersim2 <-
+#     power_analysis(
+#         model = example2,
+#         replications = 2000,
+#         n_between = c(50, 60, 70, 80, 90, 100),
+#         n_within = 5
+#     )
 
 ## -----------------------------------------------------------------------------
 summary(powersim2)
@@ -147,17 +147,17 @@ example3 <- (
 summary(example3)
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  # Set seed for replicable results
-#  set.seed(981723)
-#  
-#  # Run Power Analysis
-#  powersim3 <-
-#      power_analysis(
-#          model = example3,
-#          replications = 2000,
-#          n_between = c(30, 60, 90, 120),
-#          n_within = c(15, 30)
-#      )
+# # Set seed for replicable results
+# set.seed(981723)
+# 
+# # Run Power Analysis
+# powersim3 <-
+#     power_analysis(
+#         model = example3,
+#         replications = 2000,
+#         n_between = c(30, 60, 90, 120),
+#         n_within = c(15, 30)
+#     )
 
 ## -----------------------------------------------------------------------------
 summary(powersim3)
